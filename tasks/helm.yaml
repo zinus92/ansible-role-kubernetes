@@ -25,7 +25,7 @@
         KUBECONFIG: /etc/kubernetes/admin.conf
 
     - name: Install the server-side Tiller component on the cluster
-      command: helm init --service-account tiller --override "spec.template.spec.tolerations[0].key"="node-role.kubernetes.io/master" --override "spec.template.spec.tolerations[0].operator"="Exists" --override "spec.template.spec.tolerations[0].effect"="NoSchedule"
+      command: helm init --wait --service-account tiller --override "spec.template.spec.tolerations[0].key"="node-role.kubernetes.io/master" --override "spec.template.spec.tolerations[0].operator"="Exists" --override "spec.template.spec.tolerations[0].effect"="NoSchedule"
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
   when: not helm.stat.exists
