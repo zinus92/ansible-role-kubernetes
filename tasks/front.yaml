@@ -1,4 +1,10 @@
 ---
+- name: Create a directory if it does not exist
+  file:
+    path: /etc/kubernetes/pki
+    state: directory
+    mode: '0755'
+
 - name: Create auth data file with an admin user
   copy:
     content: '{{kube_admin_token}},{{kube_admin_username}},100,"users,system:masters"'
