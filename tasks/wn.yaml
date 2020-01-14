@@ -1,11 +1,22 @@
 ---
-- name: Wait for Kube master
-  wait_for:
-    path: /etc/profile.d/kube.sh
-  delegate_to: "{{kube_server}}"
+#- name: Wait for Kube master
+#  wait_for:
+#    path: /etc/profile.d/kube.sh
+#  delegate_to: "{{kube_server}}"
 
-- name: Add node to kube cluster
+- name: Add node to kube cluster with node_name == {{ node_name }}
+  command: kubeadm join --node-name {{ node_name }} --token {{kube_token}} {{kube_server}}:6443 --discovery-token-unsafe-skip-ca-verification creates=/etc/kubernetes/kubelet.conf
+  when: node_name  != "AUTO"
+
+- name: Add node to kube cluster with node_name == {{ node_name }}
   command: kubeadm join --token {{kube_token}} {{kube_server}}:6443 --discovery-token-unsafe-skip-ca-verification creates=/etc/kubernetes/kubelet.conf
+  when: node_name == "AUTO"
+
+- name: Reset iptables to blank slate
+  command: "{{item}}"
+  with_items:
+    - 'iptables -F'
+    - 'iptables-save'
 
 - name: Add KUBELET_EXTRA_ARGS
   lineinfile:
@@ -13,5 +24,17 @@
     line: 'Environment="KUBELET_EXTRA_ARGS={{kubelet_extra_args}}"'
     regexp: '^Environment="KUBELET_EXTRA_ARGS'
     insertafter: '\[Service\]'
-  notify: restart kubelet
+  notify: 
+  - restart kubelet
   when: kubelet_extra_args != ''
+
+- name: wait 5min for flannel and restart kubelet
+  shell: service kubelet status > /tmp/kubelet_check.log ; sleep 60; grep ''start to sync state" /tmp/kubelet_check.log
+  register: cmd_result
+  retries: 10
+  until: cmd_result | success
+
+- name: restart kubelet
+  service:
+    name: kubelet
+    state: restarted
