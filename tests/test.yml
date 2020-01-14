@@ -9,3 +9,9 @@
         - {option: "--service-node-port-range", value: "80-32767"}
         kube_admin_token: tellme_anything
         kube_admin_username: jdoe
+      - role: ansible-role-kubernetes
+        kube_type_of_node: wn
+        kube_front_end_ip: 'localhost'
+        kube_api_server: 'localhost'
+        kube_admin_token: tellme_anything
+        kube_admin_username: jdoe
