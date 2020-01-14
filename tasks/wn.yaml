@@ -42,12 +42,13 @@
 
 - name: wait 5min for flannel and restart kubelet
   block:
-    - shell: systemctl daemon-reload; service kubelet restart; sleep 10; service kubelet status > /tmp/kubelet_check.log ; sleep 50; grep "start to sync state" /tmp/kubelet_check.log
+    - name: wait for flannel and restart kubelet
+      shell: systemctl daemon-reload; service kubelet restart; sleep 60; service kubelet status > /tmp/kubelet_check.log ; grep "start to sync state" /tmp/kubelet_check.log
       register: cmd_result
       retries: 5
-      until: cmd_result | success
+      until: cmd_result.rc == 0
 
-- name: restart kubelet
-  service:
-    name: kubelet
-    state: restarted
+#- name: restart kubelet
+#  service:
+#    name: kubelet
+#    state: restarted
