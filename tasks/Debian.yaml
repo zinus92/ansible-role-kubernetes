@@ -19,15 +19,17 @@
     update_cache: yes
 
 - name: Install kubernetes packages
-  pkg:
-    - kubelet={{ kube_version }}*
-    - kubeadm={{ kube_version }}*
-    - kubectl={{ kube_version }}*
+  apt:
+    pkg:
+      - kubelet={{ kube_version }}*
+      - kubeadm={{ kube_version }}*
+      - kubectl={{ kube_version }}*
   when: kube_version != "latest"
 
 - name: Install kubernetes packages
-  pkg:
-    - kubelet
-    - kubeadm
-    - kubectl
+  apt:
+    pkg:
+      - kubelet
+      - kubeadm
+      - kubectl
   when: kube_version == "latest"
