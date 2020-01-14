@@ -1,7 +1,4 @@
 ---
-- name: Copy 'is_cluster_ready' file
-  copy: dest=/bin/is_cluster_ready src=is_cluster_ready mode=0755
-
 - name: Kubeadm init
   command: kubeadm init --pod-network-cidr={{kube_pod_network_cidr}} --token={{kube_token}} --token-ttl {{kube_token_ttl}} --apiserver-advertise-address={{kube_api_server}} creates=/etc/kubernetes/admin.conf
 
