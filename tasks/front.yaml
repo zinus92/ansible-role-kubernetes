@@ -1,4 +1,10 @@
 ---
+- name: Create auth data file with an admin user
+  copy:
+    content: '{{kube_admin_token}},{{kube_admin_username}},100,"users,system:masters"'
+    dest: /etc/kubernetes/pki/auth
+    mode: 600
+
 - name: Kubeadm init
   command: kubeadm init --pod-network-cidr={{kube_pod_network_cidr}} --token={{kube_token}} --token-ttl {{kube_token_ttl}} --apiserver-advertise-address={{kube_api_server}} creates=/etc/kubernetes/admin.conf
 
