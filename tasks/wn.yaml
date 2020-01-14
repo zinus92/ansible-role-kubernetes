@@ -48,6 +48,8 @@
       retries: 5
       until: cmd_result.rc == 0
 
+## TODO: fix labels ignored
+
 #- name: restart kubelet
 #  service:
 #    name: kubelet
