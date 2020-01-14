@@ -45,7 +45,7 @@
     - name: wait for flannel and restart kubelet
       shell: systemctl daemon-reload; service kubelet restart; sleep 60; service kubelet status > /tmp/kubelet_check.log ; grep "start to sync state" /tmp/kubelet_check.log
       register: cmd_result
-      retries: 5
+      retries: 20
       until: cmd_result.rc == 0
 
 ## TODO: fix labels ignored
