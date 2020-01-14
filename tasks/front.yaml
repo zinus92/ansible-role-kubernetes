@@ -61,6 +61,15 @@
 #     KUBECONFIG: /etc/kubernetes/admin.conf
 #   with_items: "{{ kube_apply_repos }}"
 
+- name: Add Kube API server options
+  lineinfile:
+    dest: /etc/kubernetes/manifests/kube-apiserver.yaml
+    line: '    - {{item.option}}={{item.value}}'
+    regexp: '^    - {{item.option}}='
+    insertafter: '    - kube-apiserver'
+  notify: restart kubeapi
+  with_items: "{{ kube_apiserver_options }}"
+
 - name: Reset iptables to blank slate
   command: "{{item}}"
   with_items:
