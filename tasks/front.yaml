@@ -43,8 +43,8 @@
 
 - name: install kube-dashboard
   block:
-    - get_url:
-        url: https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
+    - copy: 
+        src: files/kubernetes-dashboard.yml
         dest: /etc/kubernetes-dashboard.yaml
     - command: kubectl apply -f /etc/kubernetes-dashboard.yaml
       environment:
