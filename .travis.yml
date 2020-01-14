@@ -9,12 +9,19 @@ python: "2.7"
 before_install:
   - sudo apt-get update -qq
 
+
 addons:
   apt:
     packages:
     - python-pip
 
 install:
+  # Check ansible version
+  - sudo pip install ansible
+
+  # Check ansible version
+  - ansible --version
+  
   - sudo ansible-galaxy install indigo-dc.docker
 
   # Check ansible version
