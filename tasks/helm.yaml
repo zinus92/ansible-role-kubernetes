@@ -1,18 +1,20 @@
 ---
-- stat:
+- name: check if HELM already installed
+  stat:
     path: /usr/local/bin/helm
   register: helm
 
 # Install HELM
-- block:
+- name: Install HELM
+  block:
     - name: Copy helm install script
-      copy: 
-        src: helm.sh
+      get_url: 
+        url: https://git.io/get_helm.sh
         dest: /tmp/helm.sh
         mode: 0755
 
     - name: Execute helm install script
-      command: bash /tmp/helm.sh -v {{kube_install_helm_version}}
+      command: bash /tmp/helm.sh
 
     - name: Create RBAC permissions for Tiller (1)
       command: kubectl -n kube-system create sa tiller
@@ -25,7 +27,8 @@
         KUBECONFIG: /etc/kubernetes/admin.conf
 
     - name: Install the server-side Tiller component on the cluster
-      command: helm init --wait --service-account tiller --override "spec.template.spec.tolerations[0].key"="node-role.kubernetes.io/master" --override "spec.template.spec.tolerations[0].operator"="Exists" --override "spec.template.spec.tolerations[0].effect"="NoSchedule"
+      command: helm init --service-account tiller 
+      #command: helm init --service-account tiller --override "spec.template.spec.tolerations[0].key"="node-role.kubernetes.io/master" --override "spec.template.spec.tolerations[0].operator"="Exists" --override "spec.template.spec.tolerations[0].effect"="NoSchedule"
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
   when: not helm.stat.exists

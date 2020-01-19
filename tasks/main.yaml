@@ -8,4 +8,3 @@
 
 - name: Include "{{kube_type_of_node}}" tasks
   include: "{{kube_type_of_node}}.yaml"
-

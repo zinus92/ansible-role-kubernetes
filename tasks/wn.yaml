@@ -1,11 +1,34 @@
 ---
-- name: Wait for Kube master
-  wait_for:
-    path: /etc/profile.d/kube.sh
-  delegate_to: "{{kube_server}}"
+#- name: Wait for Kube master
+#  wait_for:
+#    path: /etc/profile.d/kube.sh
+#  delegate_to: "{{kube_server}}"
 
-- name: Add node to kube cluster
+- name: Create a directory if it does not exist
+  file:
+    path: /etc/kubernetes/pki
+    state: directory
+    mode: '0755'
+
+- name: Create auth data file with an admin user
+  copy:
+    content: '{{kube_admin_token}},{{kube_admin_username}},100,"users,system:masters"'
+    dest: /etc/kubernetes/pki/auth
+    mode: 600
+
+- name: Add node to kube cluster with node_name == {{ node_name }}
+  command: kubeadm join --node-name {{ node_name }} --token {{kube_token}} {{kube_server}}:6443 --discovery-token-unsafe-skip-ca-verification creates=/etc/kubernetes/kubelet.conf
+  when: node_name  != "AUTO"
+
+- name: Add node to kube cluster with node_name == {{ node_name }}
   command: kubeadm join --token {{kube_token}} {{kube_server}}:6443 --discovery-token-unsafe-skip-ca-verification creates=/etc/kubernetes/kubelet.conf
+  when: node_name == "AUTO"
+
+- name: Reset iptables to blank slate
+  command: "{{item}}"
+  with_items:
+    - 'iptables -F'
+    - 'iptables-save'
 
 - name: Add KUBELET_EXTRA_ARGS
   lineinfile:
@@ -13,5 +36,21 @@
     line: 'Environment="KUBELET_EXTRA_ARGS={{kubelet_extra_args}}"'
     regexp: '^Environment="KUBELET_EXTRA_ARGS'
     insertafter: '\[Service\]'
-  notify: restart kubelet
+  notify: 
+  - restart kubelet
   when: kubelet_extra_args != ''
+
+- name: wait 5min for flannel and restart kubelet
+  block:
+    - name: wait for flannel and restart kubelet
+      shell: systemctl daemon-reload; service kubelet restart; sleep 60; service kubelet status > /tmp/kubelet_check.log ; grep "start to sync state" /tmp/kubelet_check.log
+      register: cmd_result
+      retries: 20
+      until: cmd_result.rc == 0
+
+## TODO: fix labels ignored
+
+#- name: restart kubelet
+#  service:
+#    name: kubelet
+#    state: restarted

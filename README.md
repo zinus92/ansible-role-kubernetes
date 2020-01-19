@@ -21,42 +21,24 @@ The variables that can be passed to this role and a brief description about them
 	kube_token_ttl: 0
 	# POD network cidr
 	kube_pod_network_cidr: 10.244.0.0/16
-	# Type of network to install: currently supported: flannel, kube-router, romana, calico, weave
-	kube_network: flannel
 	# Kubelet extra args
 	kubelet_extra_args: ''
-	# Kube API server options
-	kube_apiserver_options: []
 	# Flag to set HELM to be installed
 	kube_install_helm: true
-	# Helm version
-	kube_install_helm_version: "v2.11.0"
 	# Deploy the Dashboard
-	kube_deploy_dashboard: false
+	kube_deploy_dashboard:  true
 	# value to pass to the kubeadm init --apiserver-advertise-address option
 	kube_api_server: 0.0.0.0
 	# A set of git repos and paths to be applied in the cluster. Following this format:
 	# kube_apply_repos: [{repo: "https://github.com/kubernetes-incubator/metrics-server", version: "master", path: "deploy/1.8+/"}]
 	kube_apply_repos: []
-
+	# Flag to set Metrics-Server to be installed
+	kube_install_metrics: false
 
 Example Playbook
 ----------------
 
 This an example of how to install this role in the front-end node:
 
-    - hosts: server
-      roles:
-      - { role: 'grycap.kubernetes', kube_apiserver_options: [{option: "--insecure-port", value: "8080"}] }
-
 And in the WNs:
 
-    - hosts: wn
-      roles:
-      - { role: 'grycap.kubernetes', kube_type_of_node: 'wn', kube_server: '10.0.0.1' }
-
-Contributing to the role
-========================
-In order to keep the code clean, pushing changes to the master branch has been disabled.
-If you want to contribute, you have to create a branch, upload your changes and then create a pull request.
-Thanks

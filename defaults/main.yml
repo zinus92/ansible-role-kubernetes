@@ -1,5 +1,5 @@
 # Version to install or latest
-kube_version: 1.13.3
+kube_version: latest 
 # Type of node front or wn
 kube_type_of_node: front
 # IP address or name of the Kube front node
@@ -10,8 +10,6 @@ kube_token: "kube01.{{ lookup('password', '/var/tmp/tokenpass chars=ascii_lowerc
 kube_token_ttl: 0
 # POD network cidr
 kube_pod_network_cidr: 10.244.0.0/16
-# Type of network to install: currently supported: flannel, kube-router, romana, calico, weave
-kube_network: flannel
 # Kubelet extra args
 kubelet_extra_args: ''
 # Kube API server options
@@ -19,13 +17,14 @@ kube_apiserver_options: []
 # Flag to set HELM to be installed
 kube_install_helm: true
 # Helm version
-kube_install_helm_version: "v2.12.3"
+#kube_install_helm_version: "v2.12.3"
 # Deploy the Dashboard
 kube_deploy_dashboard: false
-# value to pass to the kubeadm init --apiserver-advertise-address option
+# Value to pass to the kubeadm init --apiserver-advertise-address option
 kube_api_server: 0.0.0.0
-# A set of git repos and paths to be applied in the cluster. Following this format:
-# kube_apply_repos: [{repo: "https://github.com/kubernetes-incubator/metrics-server", version: "master", path: "deploy/1.8+/"}]
-kube_apply_repos: []
 # Flag to set Metrics-Server to be installed
 kube_install_metrics: false
+# Flag to set the nginx ingress controller to be installed
+kube_flanneld_extra_args: []
+
+node_name: AUTO
