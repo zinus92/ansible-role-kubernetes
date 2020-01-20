@@ -4,6 +4,24 @@
 #    path: /etc/profile.d/kube.sh
 #  delegate_to: "{{kube_server}}"
 
+- name: update repositories cache and install NFS
+  apt:
+    name: nfs-common 
+    update_cache: yes
+    cache_valid_time: 3600
+  when: "ansible_os_family == 'Debian'"
+
+- name: update repositories cache and install NFS
+  yum: 
+    name: nfs-utils
+  when: "ansible_os_family == 'RedHat'"
+
+- name: Ensure rpcbind is running
+  service: 
+    name: rpcbind
+    state: started
+    enabled: yes
+
 - name: Create a directory if it does not exist
   file:
     path: /etc/kubernetes/pki
