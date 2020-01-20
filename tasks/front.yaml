@@ -86,5 +86,5 @@
     - 'iptables -F'
     - 'iptables-save'
 
-- name: setup kubectl autocompletition
-  shell: echo 'source <(kubectl completion bash)' >> ~/.bashrc
+#- name: setup kubectl autocompletition
+#  shell: echo 'source <(kubectl completion bash)' >> ~/.bashrc
