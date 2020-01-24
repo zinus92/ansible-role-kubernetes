@@ -66,9 +66,6 @@
       retries: 20
       until: cmd_result.rc == 0
 
-## TODO: fix labels ignored
-
-#- name: restart kubelet
-#  service:
-#    name: kubelet
-#    state: restarted
+- name: set node Label (for k8s bug at kubelet restart)
+  shell: kubectl label --overwrite node `grep "{{ ansible_default_ipv4.address }}" /etc/hosts | awk '{print $2}'` {{ nodelabel }}
+  delegate_to: "{{kube_server}}"

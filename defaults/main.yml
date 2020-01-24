@@ -28,3 +28,5 @@ kube_install_metrics: false
 kube_flanneld_extra_args: []
 
 node_name: AUTO
+
+nodelabel: dummy=true
