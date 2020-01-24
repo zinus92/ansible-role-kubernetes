@@ -65,3 +65,4 @@
 - name: set node Label (for k8s bug at kubelet restart)
   shell: kubectl label --overwrite node `grep "{{ ansible_default_ipv4.address }}" /etc/hosts | awk '{print $2}'` {{ nodelabel }}
   delegate_to: "{{ kube_front_end_ip }}"
+  when: nodelabel != ""

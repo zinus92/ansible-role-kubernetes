@@ -29,4 +29,4 @@ kube_flanneld_extra_args: []
 
 node_name: AUTO
 
-nodelabel: dummy=true
+nodelabel: ""
