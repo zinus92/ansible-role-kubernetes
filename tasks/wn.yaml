@@ -1,8 +1,4 @@
 ---
-#- name: Wait for Kube master
-#  wait_for:
-#    path: /etc/profile.d/kube.sh
-#  delegate_to: "{{kube_server}}"
 
 - name: update repositories cache and install NFS
   apt:
@@ -68,4 +64,4 @@
 
 - name: set node Label (for k8s bug at kubelet restart)
   shell: kubectl label --overwrite node `grep "{{ ansible_default_ipv4.address }}" /etc/hosts | awk '{print $2}'` {{ nodelabel }}
-  delegate_to: "{{kube_server}}"
+  delegate_to: "{{ kube_front_end_ip }}"
