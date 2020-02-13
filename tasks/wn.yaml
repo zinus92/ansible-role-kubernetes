@@ -1,19 +1,18 @@
 ---
-
 - name: update repositories cache and install NFS
   apt:
-    name: nfs-common 
+    name: nfs-common
     update_cache: yes
     cache_valid_time: 3600
   when: "ansible_os_family == 'Debian'"
 
 - name: update repositories cache and install NFS
-  yum: 
+  yum:
     name: nfs-utils
   when: "ansible_os_family == 'RedHat'"
 
 - name: Ensure rpcbind is running
-  service: 
+  service:
     name: rpcbind
     state: started
     enabled: yes
@@ -22,7 +21,7 @@
   file:
     path: /etc/kubernetes/pki
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Create auth data file with an admin user
   copy:
@@ -41,8 +40,8 @@
 - name: Reset iptables to blank slate
   command: "{{item}}"
   with_items:
-    - 'iptables -F'
-    - 'iptables-save'
+    - "iptables -F"
+    - "iptables-save"
 
 - name: Add KUBELET_EXTRA_ARGS
   lineinfile:
@@ -50,8 +49,8 @@
     line: 'Environment="KUBELET_EXTRA_ARGS={{kubelet_extra_args}}"'
     regexp: '^Environment="KUBELET_EXTRA_ARGS'
     insertafter: '\[Service\]'
-  notify: 
-  - restart kubelet
+  notify:
+    - restart kubelet
   when: kubelet_extra_args != ''
 
 - name: wait 5min for flannel and restart kubelet
@@ -70,3 +69,8 @@
   shell: kubectl label --overwrite node {{ hostname.stdout }} {{ nodelabel }}
   delegate_to: "{{ kube_front_end_ip }}"
   when: nodelabel != ""
+
+- name: Install nfs-common
+  apt:
+    name: nfs-common
+    state: present
