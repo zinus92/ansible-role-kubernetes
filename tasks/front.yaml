@@ -53,7 +53,7 @@
 
 - name: install metric-server
   block:
-    - copy: src=metrics-server.yaml dest=/tmp/metrics-server.yaml
+    - copy: src=metrics-server.yml dest=/tmp/metrics-server.yaml
     - command: kubectl apply -f /tmp/metrics-server.yaml
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
