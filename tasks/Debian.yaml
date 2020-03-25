@@ -33,3 +33,9 @@
       - kubeadm
       - kubectl
   when: kube_version == "latest"
+
+- name: remove mlocate
+  apt:
+    pkg:
+      - mlocate
+    state: absent
