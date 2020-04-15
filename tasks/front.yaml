@@ -73,7 +73,7 @@
     - template:
         src: templates/nginx-ingress.yml
         dest: /etc/nginx-ingress.yml
-    - command: kubectl apply -f /tmp/nginx-ingress.yml
+    - command: kubectl apply -f /etc/nginx-ingress.yml
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
   when: nginx_ingress.enabled
