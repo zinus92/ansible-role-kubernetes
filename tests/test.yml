@@ -9,6 +9,7 @@
         - {option: "--service-node-port-range", value: "80-32767"}
         nginx_ingress:
           enabled: true
+          nodePort: 31443
         kube_admin_token: tellme_anything
         kube_admin_username: jdoe
       - role: ansible-role-kubernetes
