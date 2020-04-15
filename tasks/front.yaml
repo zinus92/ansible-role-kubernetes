@@ -59,6 +59,16 @@
         KUBECONFIG: /etc/kubernetes/admin.conf
   when: kube_install_metrics
 
+  - name: install nginx ingress
+    block:
+      - template:
+          src: templates/nginx-ingress.yaml
+          dest: /etc/nginx-ingress.yaml
+      - command: kubectl apply -f /tmp/nginx-ingress.yaml
+        environment:
+          KUBECONFIG: /etc/kubernetes/admin.conf
+    when: nginx_ingress.enabled
+
 # - name: Download git repo "{{ item.repo }}"
 #   git:
 #     repo: "{{ item.repo }}"
@@ -89,3 +99,9 @@
 
 #- name: setup kubectl autocompletition
 #  shell: echo 'source <(kubectl completion bash)' >> ~/.bashrc
+- name: kubeconfig file
+  shell: cat /etc/kubernetes/admin.conf
+  register: kubeconfig
+
+- debug:
+  var: kubeconfig.stdout

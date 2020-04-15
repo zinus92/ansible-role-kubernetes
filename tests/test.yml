@@ -7,6 +7,8 @@
         kube_apiserver_options:
         - {option: "--insecure-port", value: "8080"}
         - {option: "--service-node-port-range", value: "80-32767"}
+        nginx_ingress:
+          enabled: true
         kube_admin_token: tellme_anything
         kube_admin_username: jdoe
       - role: ansible-role-kubernetes

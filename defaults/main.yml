@@ -14,8 +14,12 @@ kube_pod_network_cidr: 10.244.0.0/16
 kubelet_extra_args: ''
 # Kube API server options
 kube_apiserver_options: []
+#  - {option: "--service-node-port-range", value: "80-32767"}
 # Flag to set HELM to be installed
 kube_install_helm: true
+nginx_ingress:
+    enabled: false
+    nodePort: 31443
 # Helm version
 #kube_install_helm_version: "v2.12.3"
 # Deploy the Dashboard
