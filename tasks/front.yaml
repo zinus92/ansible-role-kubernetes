@@ -71,9 +71,9 @@
 - name: install nginx ingress
   block:
     - template:
-        src: templates/nginx-ingress.yaml
-        dest: /etc/nginx-ingress.yaml
-    - command: kubectl apply -f /tmp/nginx-ingress.yaml
+        src: templates/nginx-ingress.yml
+        dest: /etc/nginx-ingress.yml
+    - command: kubectl apply -f /tmp/nginx-ingress.yml
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
   when: nginx_ingress.enabled
