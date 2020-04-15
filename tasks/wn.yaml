@@ -60,6 +60,7 @@
       register: cmd_result
       retries: 20
       until: cmd_result.rc == 0
+  when: network_manager == "flannel"
 
 - name: get hostname
   shell: hostname
