@@ -18,23 +18,32 @@
   wait_for:
     port: 6443
 
-- name: setting sysctl network correctly for flannel
-  lineinfile:
-    dest: /etc/sysctl.d/k8s.conf
-    regexp: '^net.bridge.bridge-nf-call-iptables'
-    line: 'net.bridge.bridge-nf-call-iptables = 1'
-    create: yes
-  notify: sysctl-system
-
-- name: get flannel manifest
-  get_url:
-    url: https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
-    dest: /etc/kube-flannel.yml
-
 - name: install flannel
-  command: kubectl apply -f /etc/kube-flannel.yml creates=/etc/cni/net.d/10-flannel.conflist
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+  block:
+  - lineinfile:
+      dest: /etc/sysctl.d/k8s.conf
+      regexp: '^net.bridge.bridge-nf-call-iptables'
+      line: 'net.bridge.bridge-nf-call-iptables = 1'
+      create: yes
+    notify: sysctl-system
+  - get_url:
+      url: https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+      dest: /etc/kube-flannel.yml
+  - command: kubectl apply -f /etc/kube-flannel.yml creates=/etc/cni/net.d/10-flannel.conflist
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+  when: network_manager == "flannel"
+
+- name: install calico
+  block:
+  - get_url:
+      url: https://docs.projectcalico.org/v3.7/manifests/calico.yaml
+      dest: /etc/kube-calico.yml
+  - shell: POD_CIDR={{ kube_pod_network_cidr }} sed -i -e "s?192.168.0.0/16?$POD_CIDR?g" /etc/kube-calico.yml
+  - command:  kubectl apply -f /etc/kube-calico.yml
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+  when: network_manager == "calico"
 
 - include: helm.yaml
   environment:
