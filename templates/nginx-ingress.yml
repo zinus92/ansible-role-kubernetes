@@ -276,7 +276,7 @@
           port: 443
           targetPort: 443
           protocol: TCP
-          nodePort: {{ nginx_ingress.NodePort }}
+          nodePort: {{ nginx_ingress.nodePort }}
       selector:
         app.kubernetes.io/name: ingress-nginx
         app.kubernetes.io/part-of: ingress-nginx
