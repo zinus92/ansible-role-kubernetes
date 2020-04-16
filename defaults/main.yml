@@ -20,7 +20,7 @@ kube_apiserver_options: []
 # Flag to set HELM to be installed
 kube_install_helm: true
 nginx_ingress:
-    enabled: false
+    enabled: true
     nodePort: 31443
 # Helm version
 #kube_install_helm_version: "v2.12.3"
