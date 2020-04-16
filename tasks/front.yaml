@@ -109,7 +109,7 @@
 
 - name: create service account for remote access
   block:
-  - shell:  kubectl -n kube-system create serviceaccount admin
+  - shell: sleep 120 && kubectl -n kube-system create serviceaccount admin
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
   - shell:  kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin
