@@ -55,7 +55,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: FelixConfiguration
     plural: felixconfigurations
@@ -69,7 +71,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: IPAMBlock
     plural: ipamblocks
@@ -84,7 +88,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: BlockAffinity
     plural: blockaffinities
@@ -99,7 +105,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: IPAMHandle
     plural: ipamhandles
@@ -114,7 +122,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: IPAMConfig
     plural: ipamconfigs
@@ -129,7 +139,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: BGPPeer
     plural: bgppeers
@@ -144,7 +156,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: BGPConfiguration
     plural: bgpconfigurations
@@ -159,7 +173,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: IPPool
     plural: ippools
@@ -172,9 +188,11 @@ kind: CustomResourceDefinition
 metadata:
   name: hostendpoints.crd.projectcalico.org
 spec:
+  preserveUnknownFields: true
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  versions:
+    - name: v1
   names:
     kind: HostEndpoint
     plural: hostendpoints
@@ -189,7 +207,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: ClusterInformation
     plural: clusterinformations
@@ -204,7 +224,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: GlobalNetworkPolicy
     plural: globalnetworkpolicies
@@ -219,7 +241,9 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: GlobalNetworkSet
     plural: globalnetworksets
@@ -234,7 +258,9 @@ metadata:
 spec:
   scope: Namespaced
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: NetworkPolicy
     plural: networkpolicies
@@ -249,7 +275,9 @@ metadata:
 spec:
   scope: Namespaced
   group: crd.projectcalico.org
-  version: v1
+  preserveUnknownFields: true
+  versions:
+    - name: v1
   names:
     kind: NetworkSet
     plural: networksets
