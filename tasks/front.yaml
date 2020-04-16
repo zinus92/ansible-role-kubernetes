@@ -109,19 +109,15 @@
 
 
 - name: create service account for remote access
-  shell: |
-    kubectl -n kube-system create serviceaccount admin
-
-    kubectl create clusterrolebinding add-on-cluster-admin \
-      --clusterrole=cluster-admin \
-      --serviceaccount=kube-system:admin
-
-    TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'`
-    TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d`
-    kubectl config set-credentials admin --token=$TOKEN
-    kubectl config --kubeconfig=config-demo set-cluster public --server=https://{{ public IP }} --insecure-skip-tls-verify
-
-    kubectl config set-context public --cluster=public --namespace=default --user=admin
+  block:
+  - shell:  kubectl -n kube-system create serviceaccount admin
+  - shell:  kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin
+  - shell: |
+      TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
+      &&  TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
+      &&  kubectl config set-credentials admin --token=$TOKEN
+  - shell: kubectl config --kubeconfig=config-demo set-cluster public --server=https://localhost --insecure-skip-tls-verify
+  - shell: kubectl config set-context public --cluster=public --namespace=default --user=admin
 
 #- name: setup kubectl autocompletition
 #  shell: echo 'source <(kubectl completion bash)' >> ~/.bashrc
