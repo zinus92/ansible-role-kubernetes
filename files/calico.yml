@@ -762,6 +762,9 @@ metadata:
     scheduler.alpha.kubernetes.io/critical-pod: ''
 spec:
   # The controller can only have a single active instance.
+  selector:
+    matchLabels:
+      k8s-app: calico-kube-controllers
   replicas: 1
   strategy:
     type: Recreate
