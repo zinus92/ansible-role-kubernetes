@@ -107,6 +107,11 @@
     - 'iptables -F'
     - 'iptables-save'
 
+- name: copy empty kubeconfig
+  copy:
+    src: files/kubeconfig
+    dst: /etc/kubeconfig
+
 - name: create service account for remote access
   shell: |
     sleep 120 && kubectl -n kube-system create serviceaccount admin \
@@ -114,12 +119,16 @@
     && TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
     &&  TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
     &&  kubectl config set-credentials admin --token=$TOKEN \
-    && kubectl config --kubeconfig=config-demo set-cluster public --server=https://localhost --insecure-skip-tls-verify \
-    && kubectl config set-context public --cluster=public --namespace=default --user=admin \
-    && kubectl config view --raw
+    && kubectl config --kubeconfig=config-demo set-cluster public --server=https://{{ kube_api_server_public}} --insecure-skip-tls-verify \
+    && kubectl config set-context public --cluster=public --namespace=default --user=admin
+  environment:
+    KUBECONFIG: /etc/kubeconfig
+
+- name: register kubeconfig    
+  shell: kubectl config view --raw
   register: kubeconfig
   environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+    KUBECONFIG: /etc/kubeconfig
 
 - debug:
     var: kubeconfig.stdout
