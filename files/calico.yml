@@ -60,6 +60,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: FelixConfiguration
     plural: felixconfigurations
@@ -78,6 +85,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: IPAMBlock
     plural: ipamblocks
@@ -97,6 +111,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: BlockAffinity
     plural: blockaffinities
@@ -116,6 +137,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: IPAMHandle
     plural: ipamhandles
@@ -135,6 +163,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: IPAMConfig
     plural: ipamconfigs
@@ -154,6 +189,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: BGPPeer
     plural: bgppeers
@@ -173,6 +215,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: BGPConfiguration
     plural: bgpconfigurations
@@ -192,6 +241,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: IPPool
     plural: ippools
@@ -211,6 +267,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: HostEndpoint
     plural: hostendpoints
@@ -230,6 +293,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: ClusterInformation
     plural: clusterinformations
@@ -249,6 +319,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: GlobalNetworkPolicy
     plural: globalnetworkpolicies
@@ -268,6 +345,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: GlobalNetworkSet
     plural: globalnetworksets
@@ -287,6 +371,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: NetworkPolicy
     plural: networkpolicies
@@ -306,6 +397,13 @@ spec:
     - name: v1
       served: true
       storage: true
+      schema:
+        x-preserve-unknown-fields: true
+        openAPIV3Schema:
+          type: object
+          properties:
+            json:
+              x-kubernetes-preserve-unknown-fields: true
   names:
     kind: NetworkSet
     plural: networksets
