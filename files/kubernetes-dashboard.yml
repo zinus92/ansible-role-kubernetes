@@ -317,7 +317,7 @@ spec:
   ports:
   - name: http
     port: 9090
-    nodePorit: 30080
+    nodePort: 30080
   selector:
     k8s-app: kubernetes-dashboard
 
