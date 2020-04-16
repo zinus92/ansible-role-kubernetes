@@ -121,6 +121,7 @@
     &&  kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN \
     && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://{{ kube_api_server_public}} --insecure-skip-tls-verify \
     && kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin
+    && kubectl config --kubeconfig=/etc/kubeconfig use-context public
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
 

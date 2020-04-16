@@ -21,7 +21,7 @@ kube_apiserver_options: []
 kube_install_helm: true
 nginx_ingress:
     enabled: true
-    nodePort: 31443
+    nodePort: 30443
 # Helm version
 #kube_install_helm_version: "v2.12.3"
 # Deploy the Dashboard
