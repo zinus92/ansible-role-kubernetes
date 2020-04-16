@@ -4,6 +4,7 @@
       - role: ansible-role-kubernetes
         kube_install_metrics: true
         kube_deploy_dashboard: true
+        kube_api_server_public: 'localhost'
         kube_apiserver_options:
         - {option: "--insecure-port", value: "8080"}
         - {option: "--service-node-port-range", value: "80-32767"}
@@ -17,7 +18,6 @@
         kube_type_of_node: wn
         kube_front_end_ip: 'localhost'
         kube_api_server: 'localhost'
-        kube_api_server_public: 'localhost'
         kube_admin_token: tellme_anything
         kube_admin_username: jdoe
         network_manager: calico
