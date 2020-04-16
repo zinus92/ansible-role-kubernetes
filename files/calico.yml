@@ -366,7 +366,6 @@ metadata:
 spec:
   scope: Namespaced
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
