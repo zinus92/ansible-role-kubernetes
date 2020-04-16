@@ -19,4 +19,5 @@
         kube_api_server: 'localhost'
         kube_admin_token: tellme_anything
         kube_admin_username: jdoe
+        network_manager: calico
         nodelabel: ""
