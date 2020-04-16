@@ -59,7 +59,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: FelixConfiguration
     plural: felixconfigurations
     singular: felixconfiguration
@@ -76,7 +77,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: IPAMBlock
     plural: ipamblocks
     singular: ipamblock
@@ -94,7 +96,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: BlockAffinity
     plural: blockaffinities
     singular: blockaffinity
@@ -112,7 +115,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: IPAMHandle
     plural: ipamhandles
     singular: ipamhandle
@@ -130,7 +134,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: IPAMConfig
     plural: ipamconfigs
     singular: ipamconfig
@@ -148,7 +153,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: BGPPeer
     plural: bgppeers
     singular: bgppeer
@@ -166,7 +172,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: BGPConfiguration
     plural: bgpconfigurations
     singular: bgpconfiguration
@@ -184,7 +191,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: IPPool
     plural: ippools
     singular: ippool
@@ -202,7 +210,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: HostEndpoint
     plural: hostendpoints
     singular: hostendpoint
@@ -220,7 +229,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: ClusterInformation
     plural: clusterinformations
     singular: clusterinformation
@@ -238,7 +248,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: GlobalNetworkPolicy
     plural: globalnetworkpolicies
     singular: globalnetworkpolicy
@@ -256,7 +267,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: GlobalNetworkSet
     plural: globalnetworksets
     singular: globalnetworkset
@@ -274,7 +286,8 @@ spec:
   versions:
     - name: v1
       served: true
-      storage: true  names:
+      storage: true
+  names:
     kind: NetworkPolicy
     plural: networkpolicies
     singular: networkpolicy
