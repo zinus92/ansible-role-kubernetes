@@ -110,7 +110,7 @@
 - name: copy empty kubeconfig
   copy:
     src: files/kubeconfig
-    dst: /etc/kubeconfig
+    dest: /etc/kubeconfig
 
 - name: create service account for remote access
   shell: |
