@@ -107,22 +107,32 @@
     - 'iptables -F'
     - 'iptables-save'
 
-
 - name: create service account for remote access
   block:
   - shell:  kubectl -n kube-system create serviceaccount admin
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
   - shell:  kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
   - shell: |
       TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
       &&  TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
       &&  kubectl config set-credentials admin --token=$TOKEN
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
   - shell: kubectl config --kubeconfig=config-demo set-cluster public --server=https://localhost --insecure-skip-tls-verify
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
   - shell: kubectl config set-context public --cluster=public --namespace=default --user=admin
-
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
 #- name: setup kubectl autocompletition
 #  shell: echo 'source <(kubectl completion bash)' >> ~/.bashrc
 - name: kubeconfig file
   shell:  kubectl config view --raw
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
   register: kubeconfig
 
 - debug:
