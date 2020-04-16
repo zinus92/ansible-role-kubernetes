@@ -55,13 +55,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -80,13 +78,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -106,13 +102,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -132,13 +126,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -158,13 +150,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -184,13 +174,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -210,13 +198,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -236,13 +222,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -260,7 +244,6 @@ kind: CustomResourceDefinition
 metadata:
   name: hostendpoints.crd.projectcalico.org
 spec:
-  preserveUnknownFields: true
   scope: Cluster
   group: crd.projectcalico.org
   versions:
@@ -268,7 +251,6 @@ spec:
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -288,13 +270,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -314,13 +294,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -340,13 +318,11 @@ metadata:
 spec:
   scope: Cluster
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -366,13 +342,11 @@ metadata:
 spec:
   scope: Namespaced
   group: crd.projectcalico.org
-  preserveUnknownFields: true
   versions:
     - name: v1
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -398,7 +372,6 @@ spec:
       served: true
       storage: true
       schema:
-        x-preserve-unknown-fields: true
         openAPIV3Schema:
           type: object
           properties:
@@ -648,7 +621,7 @@ spec:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
       hostNetwork: true
       tolerations:
         # Make sure calico-node gets scheduled on all nodes.
@@ -874,7 +847,7 @@ spec:
         k8s-app: calico-kube-controllers
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
       tolerations:
         # Mark the pod as a critical add-on for rescheduling.
         - key: CriticalAddonsOnly
