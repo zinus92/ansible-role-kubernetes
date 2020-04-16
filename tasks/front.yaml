@@ -16,6 +16,7 @@
 
 - name: wait Kube to start
   wait_for:
+    host: "{{ kube_api_server }}"
     port: 6443
 
 - name: install flannel
