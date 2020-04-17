@@ -132,5 +132,4 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
 
 - debug:
-    var: "{{ item }}"
-    with_dict: kubeconfig.stdout
+    var: kubeconfig.stdout.split('\n')
