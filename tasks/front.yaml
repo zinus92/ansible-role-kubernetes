@@ -132,4 +132,5 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
 
 - debug:
-    var: kubeconfig.stdout
+    var: {{ item }}
+    with_dict: kubeconfig.stdout
