@@ -61,7 +61,7 @@
         KUBECONFIG: /etc/kubernetes/admin.conf
   when: kube_deploy_dashboard == "k8s"
 
-- name: install kube-dashboard
+- name: install rancher-dashboard
   block:
     - copy: 
         src: files/rancher-dashboard.yml
