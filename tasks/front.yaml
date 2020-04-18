@@ -59,7 +59,17 @@
     - command: kubectl apply -f /etc/kubernetes-dashboard.yaml
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
-  when: kube_deploy_dashboard
+  when: kube_deploy_dashboard == "k8s"
+
+- name: install kube-dashboard
+  block:
+    - copy: 
+        src: files/rancher-dashboard.yml
+        dest: /etc/rancher-dashboard.yaml
+    - command: kubectl apply -f /etc/rancher-dashboard.yaml
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+  when: kube_deploy_dashboard == "rancher"
 
 - name: install metric-server
   block:
@@ -131,5 +141,6 @@
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
 
-- debug:
+- name: KUBECONFIG file
+  debug:
     var: kubeconfig.stdout.split('\n')

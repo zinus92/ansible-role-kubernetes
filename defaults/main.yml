@@ -25,7 +25,8 @@ nginx_ingress:
 # Helm version
 #kube_install_helm_version: "v2.12.3"
 # Deploy the Dashboard
-kube_deploy_dashboard: true 
+kube_deploy_dashboard: k8s
+    # or rancher
 # Value to pass to the kubeadm init --apiserver-advertise-address option
 kube_api_server: 0.0.0.0
 # Flag to set Metrics-Server to be installed
