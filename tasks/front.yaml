@@ -37,9 +37,12 @@
 
 - name: install calico
   block:
-  - copy:
-      src: files/calico.yml
+  - get_url:
+      url: https://docs.projectcalico.org/manifests/calico.yaml
       dest: /etc/kube-calico.yml
+  #- copy:
+  #    src: files/calico.yml
+  #    dest: /etc/kube-calico.yml
   - command:  kubectl apply -f /etc/kube-calico.yml
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
