@@ -40,7 +40,6 @@
   - copy:
       src: files/calico.yml
       dest: /etc/kube-calico.yml
-  - shell: POD_CIDR={{ kube_pod_network_cidr }} sed -i -e "s?192.168.0.0/16?$POD_CIDR?g" /etc/kube-calico.yml
   - command:  kubectl apply -f /etc/kube-calico.yml
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
