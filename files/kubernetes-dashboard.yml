@@ -192,6 +192,8 @@ spec:
           ports:
             - containerPort: 9090
               protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
           args:
             #- --auto-generate-certificates
             - --namespace=kubernetes-dashboard
@@ -316,8 +318,8 @@ spec:
   type: NodePort
   ports:
   - name: http
-    port: 9090
-    nodePort: 30080
+    port: 8443
+    nodePort: 30443
   selector:
     k8s-app: kubernetes-dashboard
 
