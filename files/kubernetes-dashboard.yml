@@ -190,8 +190,6 @@ spec:
           image: kubernetesui/dashboard:v2.0.0-rc7
           imagePullPolicy: Always
           ports:
-            - containerPort: 9090
-              protocol: TCP
             - containerPort: 8443
               protocol: TCP
           args:
@@ -209,9 +207,9 @@ spec:
               name: tmp-volume
           livenessProbe:
             httpGet:
-              scheme: HTTP
+              scheme: HTTPS
               path: /
-              port: 9090
+              port: 8443
             initialDelaySeconds: 30
             timeoutSeconds: 30
           securityContext:
