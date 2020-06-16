@@ -9,26 +9,12 @@
   block:
     - name: Copy helm install script
       get_url: 
-        url: https://git.io/get_helm.sh
+        url: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 
         dest: /tmp/helm.sh
         mode: 0755
-
     - name: Execute helm install script
-      command: bash -c "chmod +x /tmp/helm.sh && DESIRED_VERSION=v2.16.3 /tmp/helm.sh"
-
-    - name: Create RBAC permissions for Tiller (1)
-      command: kubectl -n kube-system create sa tiller
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-
-    - name: Create RBAC permissions for Tiller (2)
-      command: kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-
-    - name: Install the server-side Tiller component on the cluster
-      command: helm init --service-account tiller 
-      #command: helm init --service-account tiller --override "spec.template.spec.tolerations[0].key"="node-role.kubernetes.io/master" --override "spec.template.spec.tolerations[0].operator"="Exists" --override "spec.template.spec.tolerations[0].effect"="NoSchedule"
+      command: bash -c "chmod +x /tmp/helm.sh && DESIRED_VERSION=v3.2.3 /tmp/helm.sh"
+ 
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
   when: not helm.stat.exists
