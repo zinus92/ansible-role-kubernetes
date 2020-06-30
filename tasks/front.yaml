@@ -55,7 +55,7 @@
 
 - name: install kube-dashboard
   block:
-    - copy: 
+    - copy:
         src: files/kubernetes-dashboard.yml
         dest: /etc/kubernetes-dashboard.yaml
     - command: kubectl apply -f /etc/kubernetes-dashboard.yaml
@@ -65,7 +65,7 @@
 
 - name: install rancher-dashboard
   block:
-    - copy: 
+    - copy:
         src: files/rancher-dashboard.yml
         dest: /etc/rancher-dashboard.yaml
     - name: install rancher-dashboard
@@ -129,8 +129,9 @@
   shell: |
     sleep 120 && kubectl -n kube-system create serviceaccount admin \
     && kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin \
-    && TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
-    &&  TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
+    && sleep 30 \
+    && export TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
+    && export TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
     &&  kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN \
     && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://{{ kube_api_server_public}}:6443 --insecure-skip-tls-verify \
     && kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin \
@@ -138,7 +139,7 @@
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
 
-- name: register kubeconfig    
+- name: register kubeconfig
   shell: kubectl config  --kubeconfig=/etc/kubeconfig view --raw
   register: kubeconfig
   environment:
