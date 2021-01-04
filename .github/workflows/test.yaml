@@ -12,7 +12,8 @@ jobs:
     # Set the type of machine to run on
     strategy:
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+        #python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+        python-version: [3.8]
         os: [ubuntu-16.04]
     runs-on: ${{ matrix.os }}
 
