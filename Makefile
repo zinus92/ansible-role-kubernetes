@@ -2,11 +2,12 @@
 all: deps test-syntax test-deploy
 
 deps:
+	python -m pip install --upgrade pip
 	pip install ansible
 	printf '[defaults]\nroles_path=../' > ansible.cfg
 	ansible-galaxy install indigo-dc.docker
 
-test-syntax:
+lint: deps
 	ansible-playbook tests/test.yml -i tests/inventory --syntax-check
 
 test-deploy:
