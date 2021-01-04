@@ -1,5 +1,5 @@
 
-all: deps test-syntax test-deploy
+all: deps lint test-deploy
 
 deps:
 	python -m pip install --upgrade pip
@@ -10,5 +10,5 @@ deps:
 lint: deps
 	ansible-playbook tests/test.yml -i tests/inventory --syntax-check
 
-test-deploy:
+test-deploy: deps
 	ansible-playbook tests/test.yml -i tests/inventory
