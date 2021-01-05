@@ -53,27 +53,6 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   when: kube_install_helm
 
-- name: install kube-dashboard
-  block:
-    - copy:
-        src: files/kubernetes-dashboard.yml
-        dest: /etc/kubernetes-dashboard.yaml
-    - command: kubectl apply -f /etc/kubernetes-dashboard.yaml
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-  when: kube_deploy_dashboard == "k8s"
-
-- name: install rancher-dashboard
-  block:
-    - copy:
-        src: files/rancher-dashboard.yml
-        dest: /etc/rancher-dashboard.yaml
-    - name: install rancher-dashboard
-      command: kubectl apply -f /etc/rancher-dashboard.yaml
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-  when: kube_deploy_dashboard == "rancher"
-
 - name: install metric-server
   block:
     - copy: src=metrics-server.yml dest=/tmp/metrics-server.yaml
@@ -81,29 +60,6 @@
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
   when: kube_install_metrics
-
-- name: install nginx ingress
-  block:
-    - template:
-        src: templates/nginx-ingress.yml
-        dest: /etc/nginx-ingress.yml
-    - command: kubectl apply -f /etc/nginx-ingress.yml
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-  when: nginx_ingress.enabled
-
-# - name: Download git repo "{{ item.repo }}"
-#   git:
-#     repo: "{{ item.repo }}"
-#     dest: "/tmp/{{ item.repo | basename }}"
-#     version: "{{ item.version }}"
-#   with_items: "{{ kube_apply_repos }}"
-
-# - name: apply path "{{ item.path }}"
-#   command: kubectl apply -f "{{ item.path }}" chdir="/tmp/{{ item.repo | basename }}"
-#   environment:
-#     KUBECONFIG: /etc/kubernetes/admin.conf
-#   with_items: "{{ kube_apply_repos }}"
 
 - name: Add Kube API server options
   lineinfile:
@@ -118,12 +74,66 @@
   command: "{{item}}"
   with_items:
     - 'iptables -F'
+    - ''
     - 'iptables-save'
+
+- name: install nginx ingress
+  block:
+    - template:
+        src: templates/nginx-values.yaml
+        dest: /etc/nginx-ingress-values.yml
+    - command: "{{ item }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      with_items:
+      - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+      - helm repo update
+      - kubectl create namespace ingress-nginx
+      - helm install ingress-nginx ingress-nginx/ingress-nginx --namespace=ingress-nginx --values /etc/nginx-ingress-values.yml
+  when: nginx_ingress.enabled
+
+- name: install cert manager and self-signed cert
+  command: "{{ item }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  with_items:
+      - helm repo add jetstack https://charts.jetstack.io
+      - helm repo update
+      - kubectl create namespace cert-manager
+      - "helm install \
+                  cert-manager jetstack/cert-manager \
+                  --namespace cert-manager \
+                  --version v1.1.0 \
+                  --set installCRDs=true"
+  when: nginx_ingress.enabled
+
+- name: install dashboard
+  block:
+    - copy:
+        src: files/dashboard-cert.yaml
+        dest: /etc/dashboard-cert.yml
+    - template:
+        src: templates/dashboard-values.yaml
+        dest: /etc/dashboard-values.yml
+    - command: "{{ item }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      with_items:
+      - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+      - helm repo update
+      - kubectl create namespace dashboard
+      - kubectl create -f /etc/dashboard-cert.yml
+      - helm install dashboard kubernetes-dashboard/kubernetes-dashboard --namespace=dashboard --values /etc/dashboard-values.yml
+  when: nginx_ingress.enabled
 
 - name: copy empty kubeconfig
   copy:
     src: files/kubeconfig
     dest: /etc/kubeconfig
+
+# TODO wait for
+#  wait_for:
+#    
 
 - name: create service account for remote access
   shell: |

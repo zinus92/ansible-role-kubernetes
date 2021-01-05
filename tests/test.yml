@@ -4,14 +4,15 @@
       - role: ansible-role-kubernetes
         kube_install_metrics: true
         #kube_deploy_dashboard: rancher
-        kube_api_server_public: 'localhost'
+        kube_api_server_public: localhost
         kube_apiserver_options:
         - {option: "--insecure-port", value: "8080"}
         - {option: "--service-node-port-range", value: "80-32767"}
         #network_manager: calico
         nginx_ingress:
           enabled: true
-          nodePort: 31443
+          master_private_ip: 127.0.0.1
+          master_public_ip: 0.0.0.0
         kube_admin_token: tellme_anything
         kube_admin_username: jdoe
       - role: ansible-role-kubernetes

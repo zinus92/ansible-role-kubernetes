@@ -1,0 +1,5 @@
+controller:
+  service:
+    externalIPs:
+      - {{ nginx_ingress.master_private_ip }} 
+    type: ClusterIP
