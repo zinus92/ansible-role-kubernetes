@@ -103,7 +103,11 @@
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
       - kubectl create namespace ingress-nginx
-      - helm install ingress-nginx ingress-nginx/ingress-nginx --namespace=ingress-nginx --values /etc/nginx-ingress-values.yml
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+                              ingress-nginx \
+                              ingress-nginx/ingress-nginx \
+                              --namespace=ingress-nginx \
+                              --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
 
 - name: install cert manager and self-signed cert
@@ -114,7 +118,7 @@
       - helm repo add jetstack https://charts.jetstack.io
       - helm repo update
       - kubectl create namespace cert-manager
-      - "helm install \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
                   cert-manager jetstack/cert-manager \
                   --namespace cert-manager \
                   --version v1.1.0 \
@@ -125,7 +129,7 @@
   wait_for:
     #host: "cert-manager-webhook.cert-manager.svc"
     #port: 443
-    sleep: 360
+    sleep: 30
   when: nginx_ingress.enabled
 
 - name: install dashboard
@@ -143,8 +147,11 @@
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
       - kubectl create namespace dashboard
-      - kubectl create -f /etc/dashboard-cert.yml
-      - helm install dashboard kubernetes-dashboard/kubernetes-dashboard --namespace=dashboard --values /etc/dashboard-values.yml
+      - kubectl apply -f /etc/dashboard-cert.yml
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+                             dashboard kubernetes-dashboard/kubernetes-dashboard \
+                             --namespace=dashboard \
+                             --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
 
 - name: copy empty kubeconfig
