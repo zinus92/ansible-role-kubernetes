@@ -7,7 +7,8 @@ ingress:
     - kubernetes.io/ingress.class: "nginx"
     - cert-manager.io/issuer: "selfsigned-issuer"
     enabled: true
-    hosts: "dashboard.{{nginx_ingress.master_public_ip }}.xip.io"
+    hosts: 
+    - "dashboard.{{nginx_ingress.master_public_ip }}.xip.io"
     tls:
     - hosts:
         - "dashboard.{{nginx_ingress.master_public_ip }}.xip.io"

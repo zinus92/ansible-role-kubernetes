@@ -111,6 +111,12 @@
                   --set installCRDs=true"
   when: nginx_ingress.enabled
 
+- name: wait Cert-Manager to start
+  wait_for:
+    host: "cert-manager-webhook.cert-manager.svc"
+    port: 443
+  when: nginx_ingress.enabled
+
 - name: install dashboard
   block:
     - copy:
