@@ -70,6 +70,11 @@
   notify: restart kubeapi
   with_items: "{{ kube_apiserver_options }}"
 
+- name: wait Kube to start
+  wait_for:
+    host: "{{ kube_api_server }}"
+    port: 6443
+
 - name: Set iptables for ingress floatingIPs
   command: "{{item}}"
   with_items:
@@ -80,6 +85,11 @@
     - 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 80 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:80'
     - 'iptables -t nat -A POSTROUTING ! -s 127.0.0.1 -j MASQUERADE'
     - 'iptables-save'
+
+- name: wait Kube to start
+  wait_for:
+    host: "{{ kube_api_server }}"
+    port: 6443
 
 - name: install nginx ingress
   block:
