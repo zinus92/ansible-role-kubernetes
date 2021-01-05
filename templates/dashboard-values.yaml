@@ -1,6 +1,5 @@
-protocolHttp: true
 service:
-    externalPort: 8080
+    externalPort: 9090
 
 ingress:
     annotations:
