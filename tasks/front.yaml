@@ -123,8 +123,9 @@
 
 - name: wait Cert-Manager to start
   wait_for:
-    host: "cert-manager-webhook.cert-manager.svc"
-    port: 443
+    #host: "cert-manager-webhook.cert-manager.svc"
+    #port: 443
+    sleep: 120
   when: nginx_ingress.enabled
 
 - name: install dashboard
