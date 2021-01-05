@@ -70,11 +70,15 @@
   notify: restart kubeapi
   with_items: "{{ kube_apiserver_options }}"
 
-- name: Reset iptables to blank slate
+- name: Set iptables for ingress floatingIPs
   command: "{{item}}"
   with_items:
     - 'iptables -F'
-    - ''
+    - 'iptables -A FORWARD -p tcp -d {{nginx_ingress.master_private_ip }} --dport 443 -j ACCEPT'
+    - 'iptables -A FORWARD -p tcp -d {{nginx_ingress.master_private_ip }} --dport 80 -j ACCEPT'
+    - 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 443 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:443'
+    - 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 80 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:80'
+    - 'iptables -t nat -A POSTROUTING ! -s 127.0.0.1 -j MASQUERADE'
     - 'iptables-save'
 
 - name: install nginx ingress
