@@ -93,6 +93,9 @@
 
 - name: install nginx ingress
   block:
+    - copy:
+        src: files/nginx-namespace.yaml
+        dest: /etc/nginx-namespace.yml
     - template:
         src: templates/nginx-values.yaml
         dest: /etc/nginx-ingress-values.yml
@@ -102,7 +105,7 @@
       with_items:
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
-      - kubectl create namespace ingress-nginx
+      - kubectl apply -f  /etc/nginx-namespace.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
                               ingress-nginx \
                               ingress-nginx/ingress-nginx \
@@ -110,19 +113,23 @@
                               --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
 
-- name: install cert manager and self-signed cert
-  command: "{{ item }}"
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
-  with_items:
-      - helm repo add jetstack https://charts.jetstack.io
-      - helm repo update
-      - kubectl create namespace cert-manager
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
-                  cert-manager jetstack/cert-manager \
-                  --namespace cert-manager \
-                  --version v1.1.0 \
-                  --set installCRDs=true"
+- name: install cert manager
+  block:
+    - copy:
+        src: files/cert-manager-namespace.yaml
+        dest: /etc/cert-manager-namespace.yml
+    - command: "{{ item }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      with_items:
+          - helm repo add jetstack https://charts.jetstack.io
+          - helm repo update
+          - kubectl apply -f /etc/cert-manager-namespace.yml
+          - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+                      cert-manager jetstack/cert-manager \
+                      --namespace cert-manager \
+                      --version v1.1.0 \
+                      --set installCRDs=true"
   when: nginx_ingress.enabled
 
 - name: wait Cert-Manager to start
@@ -137,6 +144,9 @@
     - copy:
         src: files/dashboard-cert.yaml
         dest: /etc/dashboard-cert.yml
+    - copy:
+        src: files/dashboard-namespace.yaml
+        dest: /etc/dashboard-namespace.yml
     - template:
         src: templates/dashboard-values.yaml
         dest: /etc/dashboard-values.yml
@@ -146,7 +156,7 @@
       with_items:
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
-      - kubectl create namespace dashboard
+      - kubectl apply -f /etc/dashboard-namespace.yml
       - kubectl apply -f /etc/dashboard-cert.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
                              dashboard kubernetes-dashboard/kubernetes-dashboard \
