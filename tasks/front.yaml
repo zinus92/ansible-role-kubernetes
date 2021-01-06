@@ -156,6 +156,73 @@
                              --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
 
+- name: install prometheus
+  block:
+    - copy:
+        src: files/prometheus-namespace.yaml
+        dest: /etc/prometheus-namespace.yml
+    - template:
+        src: templates/prometheus-values.yaml
+        dest: /etc/prometheus-values.yml
+    - command: "{{ item }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      with_items:
+      - helm repo add prometheus https://prometheus-community.github.io/helm-charts
+      - helm repo update
+      - kubectl apply -f /etc/prometheus-namespace.yml
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+                             prometheus prometheus/prometheus \
+                             --namespace=prometheus \
+                             --values /etc/prometheus-values.yml"
+  when: nginx_ingress.enabled
+
+- name: install kube-eagle 
+  block:
+    - copy:
+        src: files/eagle-namespace.yaml
+        dest: /etc/eagle-namespace.yml
+    - command: "{{ item }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      with_items:
+      - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
+      - helm repo update
+      - kubectl apply -f /etc/eagle-namespace.yml
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+                             kube-eagle kube-eagle/kube-eagle \
+                             --namespace=kube-eagle"
+  when: nginx_ingress.enabled
+
+- name: install grafana 
+  block:
+    - template:
+        src: templates/grafana-secret.yaml
+        dest: /etc/grafana-secret.yml
+    - copy:
+        src: files/grafana-cert.yaml
+        dest: /etc/grafana-cert.yml
+    - copy:
+        src: files/grafana-namespace.yaml
+        dest: /etc/grafana-namespace.yml
+    - template:
+        src: templates/prometheus-values.yaml
+        dest: /etc/grafana-values.yml
+    - command: "{{ item }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      with_items:
+      - helm repo add grafana https://grafana.github.io/helm-charts
+      - helm repo update
+      - kubectl apply -f /etc/grafana-namespace.yml
+      - kubectl apply -n grafana -f /etc/grafana-secret.yml
+      - kubectl apply -n grafana -f /etc/grafana-cert.yml
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+                             grafana grafana/grafana \
+                             --namespace=grafana \
+                             --values /etc/grafana-values.yml"
+  when: nginx_ingress.enabled
+
 - name: copy empty kubeconfig
   copy:
     src: files/kubeconfig
