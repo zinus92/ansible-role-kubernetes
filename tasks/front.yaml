@@ -206,7 +206,7 @@
         src: files/grafana-namespace.yaml
         dest: /etc/grafana-namespace.yml
     - template:
-        src: templates/prometheus-values.yaml
+        src: templates/grafana-values.yaml
         dest: /etc/grafana-values.yml
     - command: "{{ item }}"
       environment:
