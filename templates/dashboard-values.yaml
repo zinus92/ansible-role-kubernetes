@@ -14,7 +14,7 @@ ingress:
       secretName: dash-selfsigned
 
 metricsScraper:
-  enabled: false
+  enabled: true
 
 metrics-server:
-  enabled: false
+  enabled: true
