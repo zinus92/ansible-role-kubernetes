@@ -12,3 +12,9 @@ ingress:
     - hosts:
         - "dashboard.{{nginx_ingress.master_public_ip }}.xip.io"
       secretName: dash-selfsigned
+
+metricsScraper:
+  enabled: true
+
+metrics-server:
+  enabled: true
