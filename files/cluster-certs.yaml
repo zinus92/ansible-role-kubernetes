@@ -1,8 +1,8 @@
 apiVersion: cert-manager.io/v1alpha2
-kind: Issuer
+kind: ClusterIssuer
 metadata:
   name: lets-issuer
-  namespace: dashboard
+  namespace: kube-system
 spec:
   acme:
     # The ACME server URL
