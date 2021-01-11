@@ -131,11 +131,17 @@
     sleep: 30
   when: nginx_ingress.enabled
 
-- name: install dashboard
+- name: define cluster issuer
   block:
     - copy:
-        src: files/dashboard-cert.yaml
-        dest: /etc/dashboard-cert.yml
+        src: files/cluster-certs.yaml
+        dest: /etc/cluster-certs.yml 
+    - command: "kubectl apply -f /etc/cluster-certs.yml "
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+
+- name: install dashboard
+  block:
     - copy:
         src: files/dashboard-namespace.yaml
         dest: /etc/dashboard-namespace.yml
@@ -149,7 +155,6 @@
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
       - kubectl apply -f /etc/dashboard-namespace.yml
-      - kubectl apply -f /etc/dashboard-cert.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
                              dashboard kubernetes-dashboard/kubernetes-dashboard \
                              --namespace=dashboard \
@@ -200,9 +205,6 @@
         src: templates/grafana-secret.yaml
         dest: /etc/grafana-secret.yml
     - copy:
-        src: files/grafana-cert.yaml
-        dest: /etc/grafana-cert.yml
-    - copy:
         src: files/grafana-namespace.yaml
         dest: /etc/grafana-namespace.yml
     - template:
@@ -216,7 +218,6 @@
       - helm repo update
       - kubectl apply -f /etc/grafana-namespace.yml
       - kubectl apply -n grafana -f /etc/grafana-secret.yml
-      - kubectl apply -n grafana -f /etc/grafana-cert.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
                              grafana grafana/grafana \
                              --namespace=grafana \
