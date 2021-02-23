@@ -98,7 +98,7 @@
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
       - kubectl apply -f  /etc/nginx-namespace.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                               ingress-nginx \
                               ingress-nginx/ingress-nginx \
                               --namespace=ingress-nginx \
@@ -117,7 +117,7 @@
           - helm repo add jetstack https://charts.jetstack.io
           - helm repo update
           - kubectl apply -f /etc/cert-manager-namespace.yml
-          - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+          - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                       cert-manager jetstack/cert-manager \
                       --namespace cert-manager \
                       --version v1.1.0 \
@@ -155,7 +155,7 @@
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
       - kubectl apply -f /etc/dashboard-namespace.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              dashboard kubernetes-dashboard/kubernetes-dashboard \
                              --namespace=dashboard \
                              --values /etc/dashboard-values.yml"
@@ -176,7 +176,7 @@
       - helm repo add prometheus https://prometheus-community.github.io/helm-charts
       - helm repo update
       - kubectl apply -f /etc/prometheus-namespace.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              prometheus prometheus/prometheus \
                              --namespace=prometheus \
                              --values /etc/prometheus-values.yml"
@@ -194,7 +194,7 @@
       - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
       - helm repo update
       - kubectl apply -f /etc/eagle-namespace.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              kube-eagle kube-eagle/kube-eagle \
                              --namespace=kube-eagle"
   when: nginx_ingress.enabled
@@ -218,7 +218,7 @@
       - helm repo update
       - kubectl apply -f /etc/grafana-namespace.yml
       - kubectl apply -n grafana -f /etc/grafana-secret.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              grafana grafana/grafana \
                              --namespace=grafana \
                              --values /etc/grafana-values.yml"
