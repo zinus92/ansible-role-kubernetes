@@ -8,7 +8,7 @@ datasources:
     datasources:
     - name: Prometheus
       type: prometheus
-      url: http://prometheus-server.prometheus.svc.cluster.local
+      url: http://prometheus-server.prometheus.svc
       access: proxy
       isDefault: true
 dashboards:
