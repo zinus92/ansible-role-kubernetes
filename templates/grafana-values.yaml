@@ -1,7 +1,12 @@
 admin:
   existingSecret: grafana-secrets
 service:
-  type: ClusterIP 
+  type: ClusterIP
+downloadDashboardsImage:
+  repository: dodasts/ttscache
+  tag: latest
+  sha: ""
+  pullPolicy: IfNotPresent
 datasources:
   datasources.yaml:
     apiVersion: 1
