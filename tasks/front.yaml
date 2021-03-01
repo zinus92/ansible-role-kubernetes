@@ -154,10 +154,11 @@
       with_items:
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
-      - kubectl apply -f /etc/dashboard-namespace.yml
+      #- kubectl apply -f /etc/dashboard-namespace.yml
+      - kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.4.2/components.yaml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              dashboard kubernetes-dashboard/kubernetes-dashboard \
-                             --namespace=dashboard \
+                             --namespace=kube-system \
                              --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
 
