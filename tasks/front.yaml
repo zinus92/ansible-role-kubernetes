@@ -143,8 +143,8 @@
 - name: install dashboard
   block:
     - copy:
-        src: files/dashboard-namespace.yaml
-        dest: /etc/dashboard-namespace.yml
+        src: files/metric-server.yaml
+        dest: /etc/metric-server.yml
     - template:
         src: templates/dashboard-values.yaml
         dest: /etc/dashboard-values.yml
@@ -154,8 +154,7 @@
       with_items:
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
-      #- kubectl apply -f /etc/dashboard-namespace.yml
-      - kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.4.2/components.yaml
+      - kubectl apply -f metric-server.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              dashboard kubernetes-dashboard/kubernetes-dashboard \
                              --namespace=kube-system \
