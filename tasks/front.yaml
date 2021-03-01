@@ -154,7 +154,7 @@
       with_items:
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
-      - kubectl apply -f metric-server.yml
+      - kubectl apply -f /etc/metric-server.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              dashboard kubernetes-dashboard/kubernetes-dashboard \
                              --namespace=kube-system \
