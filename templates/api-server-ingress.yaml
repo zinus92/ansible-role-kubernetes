@@ -1,14 +1,15 @@
 ---
 kind: Ingress
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 metadata:
   name: kubernetes-api
-  namespace: kube-system 
+  namespace: default 
   labels:
     app: kubernetes
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: "selfsigned-issuer"
+    nginx.ingress.kubernetes.io/backend-protocol:  "HTTPS"
 spec:
   tls:
     - secretName: kubernetes-api-cert
