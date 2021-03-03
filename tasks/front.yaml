@@ -27,8 +27,8 @@
       line: 'net.bridge.bridge-nf-call-iptables = 1'
       create: yes
     notify: sysctl-system
-  - get_url:
-      url: https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+  - template:
+      src: templates/flannel.yaml
       dest: /etc/kube-flannel.yml
   - command: kubectl apply -f /etc/kube-flannel.yml creates=/etc/cni/net.d/10-flannel.conflist
     environment:
