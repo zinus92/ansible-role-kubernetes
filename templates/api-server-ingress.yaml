@@ -22,5 +22,7 @@ spec:
       paths:
       - path: "/"
         backend:
-          serviceName: kubernetes
-          servicePort: 6443
+          service:
+            name: kubernetes
+            port:
+              number: 6443
