@@ -38,12 +38,15 @@
 - name: install calico
   block:
   - get_url:
-      url: https://docs.projectcalico.org/manifests/calico.yaml
-      dest: /etc/kube-calico.yml
-  #- copy:
-  #    src: files/calico.yml
-  #    dest: /etc/kube-calico.yml
-  - command:  kubectl apply -f /etc/kube-calico.yml
+    url: https://docs.projectcalico.org/manifests/custom-resources.yaml
+    dest: /etc/kube-calico-crds.yml
+  - get_url:
+    url: https://docs.projectcalico.org/manifests/tigera-operator.yaml 
+    dest: /etc/kube-calico-operator.yml
+  - command: "{{item}}"
+    with_items:
+      - 'kubectl apply -f /etc/kube-calico-operator.yml'
+      - 'kubectl apply -f /etc/kube-calico-crds.yml'
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
   when: network_manager == "calico"
