@@ -1,0 +1,55 @@
+admin:
+  existingSecret: grafana-secrets
+service:
+  type: ClusterIP
+downloadDashboardsImage:
+  repository: dciangot/curl
+  tag: latest
+  #repository: curlimages/curl 
+  #tag: 7.73.0
+  sha: ""
+  pullPolicy: IfNotPresent
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-server.prometheus.svc
+      access: proxy
+      isDefault: true
+dashboards:
+  default:
+    prometheus-stats:
+      # Ref: https://grafana.com/dashboards/10000
+      gnetId: 10000
+      revision: 1
+      datasource: Prometheus
+    kube-eagle-stats:
+      # Ref: https://grafana.com/dashboards/9871
+      gnetId: 9871
+      revision: 2
+      datasource: Prometheus
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "selfsigned-issuer"
+  hosts:
+    - "grafana.{{nginx_ingress.master_public_ip }}.myip.cloud.infn.it"
+  tls:
+    - hosts:
+      - "grafana.{{nginx_ingress.master_public_ip }}.myip.cloud.infn.it"
+      secretName: grafana-selfsigned
