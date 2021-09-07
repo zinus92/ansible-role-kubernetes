@@ -38,11 +38,11 @@
 - name: install calico
   block:
   - get_url:
-    url: https://docs.projectcalico.org/manifests/custom-resources.yaml
-    dest: /etc/kube-calico-crds.yml
+      url: https://docs.projectcalico.org/manifests/custom-resources.yaml
+      dest: /etc/kube-calico-crds.yml
   - get_url:
-    url: https://docs.projectcalico.org/manifests/tigera-operator.yaml 
-    dest: /etc/kube-calico-operator.yml
+      url: https://docs.projectcalico.org/manifests/tigera-operator.yaml 
+      dest: /etc/kube-calico-operator.yml
   - command: "{{item}}"
     with_items:
       - 'kubectl apply -f /etc/kube-calico-operator.yml'
