@@ -104,6 +104,7 @@
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                               ingress-nginx \
                               ingress-nginx/ingress-nginx \
+                              --set controller.allowSnippetAnnotations=false \
                               --namespace=ingress-nginx \
                               --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
