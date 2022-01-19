@@ -53,3 +53,6 @@ ingress:
     - hosts:
       - "grafana.{{nginx_ingress.master_public_ip }}.myip.cloud.infn.it"
       secretName: grafana-selfsigned
+grafana.ini:
+  security:
+    cookie_secure: true
