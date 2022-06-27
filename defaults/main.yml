@@ -1,5 +1,5 @@
 # Version to install or latest
-kube_version: latest 
+kube_version: 1.24.2
 # Type of node front or wn
 kube_type_of_node: front
 # IP address or name of the Kube front node
@@ -39,3 +39,15 @@ kube_flanneld_extra_args: []
 node_name: AUTO
 
 nodelabel: ""
+
+nginx-ingress_helm_version: 4.1.4
+
+cert-manager_helm_version: v1.8.1
+
+dashboard_helm_version: 5.7.0
+
+prometheus_helm_version: 15.10.1
+
+kube-eagle_helm_version: 2.0.0
+
+grafana_helm_version:  6.30.3
