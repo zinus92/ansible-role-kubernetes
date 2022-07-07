@@ -40,14 +40,14 @@ node_name: AUTO
 
 nodelabel: ""
 
-nginx-ingress_helm_version: 4.1.4
+nginx_ingress_helm_version: 4.1.4
 
-cert-manager_helm_version: v1.8.1
+cert_manager_helm_version: v1.8.1
 
 dashboard_helm_version: 5.7.0
 
 prometheus_helm_version: 15.10.1
 
-kube-eagle_helm_version: 2.0.0
+kube_eagle_helm_version: 2.0.0
 
 grafana_helm_version:  6.30.3
