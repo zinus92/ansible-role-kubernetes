@@ -71,15 +71,40 @@
     port: 6443
 
 - name: Set iptables for ingress floatingIPs
-  command: "{{item}}"
-  with_items:
-    - 'iptables -F'
-    - 'iptables -A FORWARD -p tcp -d {{nginx_ingress.master_private_ip }} --dport 443 -j ACCEPT'
-    - 'iptables -A FORWARD -p tcp -d {{nginx_ingress.master_private_ip }} --dport 80 -j ACCEPT'
-    - 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 443 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:443'
-    - 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 80 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:80'
-    - 'iptables -t nat -A POSTROUTING ! -s 127.0.0.1 -j MASQUERADE'
-    - 'iptables-save'
+  block:
+    - command: 'iptables -F'     
+    - name: 'iptables -A FORWARD -p tcp -d {{nginx_ingress.master_private_ip }} --dport 443,80 -j ACCEPT'
+      iptables:
+        chain: FORWARD
+        protocol: tcp
+        destination: "{{ nginx_ingress.master_private_ip }}"
+        destination_port: "{{ item }}"
+        jump: ACCEPT
+        comment: "managed by kubernetes ansible role"
+      loop:
+        - 443
+        - 80        
+    - name: 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 443,80 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:443,80'
+      iptables:
+        table: nat
+        chain: PREROUTING
+        protocol: tcp
+        destination: "{{ nginx_ingress.master_public_ip }}"
+        destination_port: "{{ item }}"
+        jump: DNAT
+        to_destination: "{{ nginx_ingress.master_private_ip }}:{{ item }}"
+        comment: "managed by kubernetes ansible role"
+      loop:
+        - 443
+        - 80              
+    - name: 'iptables -t nat -A POSTROUTING ! -s 127.0.0.1 -j MASQUERADE'
+      iptables:
+        table: nat     
+        chain: POSTROUTING
+        source: '! 127.0.0.1'
+        jump: MASQUERADE
+        comment: "managed by kubernetes ansible role"
+    - command: 'iptables-save'
 
 - name: wait Kube to start
   wait_for:
@@ -100,12 +125,11 @@
       with_items:
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
-      - kubectl apply -f  /etc/nginx-namespace.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                               ingress-nginx \
                               ingress-nginx/ingress-nginx \
                               --set controller.allowSnippetAnnotations=false \
-                              --namespace=ingress-nginx \
+                              -n ingress-nginx --create-namespace \
                               --version {{ nginx_ingress_helm_version }} \
                               --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
@@ -124,24 +148,27 @@
           - kubectl apply -f /etc/cert-manager-namespace.yml
           - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                       cert-manager jetstack/cert-manager \
-                      --namespace cert-manager \
+                      -n cert-manager --create-namespace \
                       --version {{ cert_manager_helm_version }} \
                       --set installCRDs=true"
   when: nginx_ingress.enabled
 
 - name: wait Cert-Manager to start
-  wait_for:
-    #host: "cert-manager-webhook.cert-manager.svc"
-    #port: 443
-    sleep: 30
+  command: kubectl get deployment -n cert-manager -l 'app=webhook' -o 'jsonpath={.items[0].status.readyReplicas}'
+  register: cert_manager_webhook_deployment_status
+  until: (cert_manager_webhook_deployment_status.stdout | default(0) | int) >= 1
+  retries: 30
+  delay: 15
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
   when: nginx_ingress.enabled
 
 - name: define cluster issuer
   block:
-    - copy:
-        src: files/cluster-certs.yaml
+    - template:
+        src: cluster-certs.yaml
         dest: /etc/cluster-certs.yml 
-    - command: "kubectl apply -f /etc/cluster-certs.yml "
+    - command: "kubectl apply -f /etc/cluster-certs.yml"
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
 
@@ -162,7 +189,7 @@
       - kubectl apply -f /etc/metric-server.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              dashboard kubernetes-dashboard/kubernetes-dashboard \
-                             --namespace=kube-system \
+                             -n kube-system \
                              --version {{ dashboard_helm_version }} \
                              --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
@@ -181,10 +208,9 @@
       with_items:
       - helm repo add prometheus https://prometheus-community.github.io/helm-charts
       - helm repo update
-      - kubectl apply -f /etc/prometheus-namespace.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              prometheus prometheus/prometheus \
-                             --namespace=prometheus \
+                             -n prometheus --create-namespace \
                              --version {{ prometheus_helm_version }} \
                              --values /etc/prometheus-values.yml"
   when: nginx_ingress.enabled
@@ -200,11 +226,10 @@
       with_items:
       - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
       - helm repo update
-      - kubectl apply -f /etc/eagle-namespace.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              kube-eagle kube-eagle/kube-eagle \
                              --version {{ kube_eagle_helm_version }} \
-                             --namespace=kube-eagle"
+                             -n kube-eagle --create-namespace"
   when: nginx_ingress.enabled
 
 - name: install grafana 
@@ -228,7 +253,7 @@
       - kubectl apply -n grafana -f /etc/grafana-secret.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              grafana grafana/grafana \
-                             --namespace=grafana \
+                             -n grafana --create-namespace \
                              --version {{ grafana_helm_version }}
                              --values /etc/grafana-values.yml"
   when: nginx_ingress.enabled
@@ -238,26 +263,26 @@
     src: files/kubeconfig
     dest: /etc/kubeconfig
   
-- name: expose apiserver trhough ingress
-  block:
-    - template:
-        src: templates/api-server-ingress.yaml
-        dest: /etc/api-server-ingress.yaml
-    - command: "{{ item }}"
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      with_items:
-      - kubectl apply -f /etc/api-server-ingress.yaml
+# - name: expose apiserver through ingress
+#   block:
+#     - template:
+#         src: templates/api-server-ingress.yaml
+#         dest: /etc/api-server-ingress.yaml
+#     - command: "{{ item }}"
+#       environment:
+#         KUBECONFIG: /etc/kubernetes/admin.conf
+#       with_items:
+#       - kubectl apply -f /etc/api-server-ingress.yaml
 
 - name: create service account for remote access
   shell: |
-    kubectl -n kube-system create serviceaccount admin \
-    && kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin \
+    kubectl -n kube-system create --dry-run=client serviceaccount admin -o yaml | kubectl apply -f - \
+    && kubectl create --dry-run=client clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin -o yaml | kubectl apply -f - \
     && sleep 30 \
     && export TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
     && export TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
     &&  kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN \
-    && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://api-kubernetes.{{nginx_ingress.master_public_ip }}.myip.cloud.infn.it --insecure-skip-tls-verify \
+    && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://{{nginx_ingress.dns_name }}:6443 --insecure-skip-tls-verify \
     && kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin \
     && kubectl config --kubeconfig=/etc/kubeconfig use-context public
   environment:

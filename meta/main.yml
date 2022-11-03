@@ -11,12 +11,13 @@ galaxy_info:
     - 7
   - name: Ubuntu
     versions:
-    - trusty
+    - focal
   galaxy_tags:
     - kubernetes
-
+# !!!!!
 dependencies:
-  - role: indigo-dc.docker
+  - role: indigo-dc.containerd
     vars:
       docker_config:
-        exec-opts: ["native.cgroupdriver=systemd"]
+        exec-opts: ["native.cgroupdriver=systemd"] 
+# !!!!!
