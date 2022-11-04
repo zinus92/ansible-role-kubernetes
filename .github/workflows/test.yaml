@@ -1,7 +1,12 @@
 name: tester
 
 # Run this workflow every time a new commit pushed to your repository
-on: push
+on: 
+  push:
+    branches:
+      - k8s_1_24
+  
+  workflow_dispach:
 
 jobs:
   # Set the job key. The key is displayed as the job name
