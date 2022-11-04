@@ -16,7 +16,7 @@ galaxy_info:
     - kubernetes
 # !!!!!
 dependencies:
-  - role: indigo-dc.containerd
+  - role: geerlingguy.containerd
     vars:
       docker_config:
         exec-opts: ["native.cgroupdriver=systemd"] 
