@@ -4,7 +4,7 @@ galaxy_info:
   description: Install Kubernetes cluster
   company: INFN 
   license: Apache
-  min_ansible_version: 2.0
+  min_ansible_version: 2.9
   platforms:
   - name: EL
     versions:
@@ -14,10 +14,6 @@ galaxy_info:
     - focal
   galaxy_tags:
     - kubernetes
-# !!!!!
+
 dependencies:
   - role: geerlingguy.containerd
-    vars:
-      docker_config:
-        exec-opts: ["native.cgroupdriver=systemd"] 
-# !!!!!
