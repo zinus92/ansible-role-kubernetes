@@ -26,6 +26,10 @@
       regexp: '^net.bridge.bridge-nf-call-iptables'
       line: 'net.bridge.bridge-nf-call-iptables = 1'
       create: yes
+  - lineinfile:
+      path: /proc/sys/net/ipv4/ip_forward
+      line: '1'
+      create: yes
   - blockinfile:
       path: /etc/modules-load.d/k8s.conf
       create: yes
