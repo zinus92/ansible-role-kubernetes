@@ -2,6 +2,22 @@
 - name: Disable swap
   command: swapoff -a
 
+- name: Add the br_netfilter module
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Let iptables see bridged traffic.
+  sysctl:
+    name: "{{ item }}"
+    value: '1'
+    state: present
+  loop:
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+    - net.ipv4.ip_forward
+  notify: sysctl-system
+
 - name: Include "{{ ansible_os_family }}" Kubernetes recipe
   include: "{{ ansible_os_family }}.yaml"
   static: false

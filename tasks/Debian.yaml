@@ -12,22 +12,6 @@
     url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
     state: present
 
-- name: Add the br_netfilter module
-  modprobe:
-    name: br_netfilter
-    state: present
-
-- name: Let iptables see bridged traffic.
-  sysctl:
-    name: "{{ item }}"
-    value: '1'
-    state: present
-  loop:
-    - net.bridge.bridge-nf-call-iptables
-    - net.bridge.bridge-nf-call-ip6tables
-    - net.ipv4.ip_forward
-  notify: sysctl-system
-
 - name: Add kubernetes repo
   apt_repository:
     repo:  'deb http://apt.kubernetes.io/ kubernetes-xenial main'
