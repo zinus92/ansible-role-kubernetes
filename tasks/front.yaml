@@ -7,12 +7,12 @@
 
 - name: Create auth data file with an admin user
   copy:
-    content: '{{kube_admin_token}},{{kube_admin_username}},100,"users,system:masters"'
+    content: '{{ kube_admin_token }},{{ kube_admin_username }},100,"users,system:masters"'
     dest: /etc/kubernetes/pki/auth
     mode: 600
 
 - name: Kubeadm init
-  command: kubeadm init --pod-network-cidr={{kube_pod_network_cidr}} --token={{kube_token}} --token-ttl {{kube_token_ttl}} --apiserver-advertise-address={{kube_api_server}} creates=/etc/kubernetes/admin.conf
+  command: kubeadm init --pod-network-cidr={{ kube_pod_network_cidr }} --token={{ kube_token }} --token-ttl {{ kube_token_ttl }} --apiserver-advertise-address={{ kube_api_server }} creates=/etc/kubernetes/admin.conf
 
 - name: wait Kube to start
   wait_for:
@@ -39,7 +39,7 @@
       # url: https://docs.projectcalico.org/manifests/tigera-operator.yaml
       url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.5/manifests/tigera-operator.yaml
       dest: /etc/kube-calico-operator.yml
-  - command: "{{ item }}"
+  - command: "{{ item  }}"
     with_items:
       - 'kubectl apply -f /etc/kube-calico-operator.yml'
       - 'kubectl apply -f /etc/kube-calico-crds.yml'
@@ -55,8 +55,8 @@
 - name: Add Kube API server options
   lineinfile:
     path: /etc/kubernetes/manifests/kube-apiserver.yaml
-    line: '    - {{item.option}}={{item.value}}'
-    regexp: '^    - {{item.option}}='
+    line: '    - {{ item.option }}={{ item.value }}'
+    regexp: '^    - {{ item.option }}='
     insertafter: '    - kube-apiserver'
   notify: restart kubeapi
   with_items: "{{ kube_apiserver_options }}"
@@ -69,7 +69,7 @@
 - name: Set iptables for ingress floatingIPs
   block:
     - command: 'iptables -F'     
-    - name: 'iptables -A FORWARD -p tcp -d {{nginx_ingress.master_private_ip }} --dport 443,80 -j ACCEPT'
+    - name: 'iptables -A FORWARD -p tcp -d {{ nginx_ingress.master_private_ip }} --dport 443,80 -j ACCEPT'
       iptables:
         chain: FORWARD
         protocol: tcp
@@ -80,7 +80,7 @@
       loop:
         - 443
         - 80        
-    - name: 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 443,80 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:443,80'
+    - name: 'iptables -t nat -A PREROUTING -p tcp -d {{ nginx_ingress.master_public_ip }} --dport 443,80 -j DNAT --to-destination {{ nginx_ingress.master_private_ip }}:443,80'
       iptables:
         table: nat
         chain: PREROUTING
@@ -261,14 +261,14 @@
   
 # - name: expose apiserver through ingress
 #   block:
-#     - template:
-#         src: templates/api-server-ingress.yaml
-#         dest: /etc/api-server-ingress.yaml
-#     - command: "{{ item }}"
-#       environment:
-#         KUBECONFIG: /etc/kubernetes/admin.conf
-#       with_items:
-#       - kubectl apply -f /etc/api-server-ingress.yaml
+#   - template:
+#       src: templates/api-server-ingress.yaml
+#       dest: /etc/api-server-ingress.yaml
+#   - command: "{{ item }}"
+#     environment:
+#       KUBECONFIG: /etc/kubernetes/admin.conf
+#   with_items:
+#     - kubectl apply -f /etc/api-server-ingress.yaml
 
 - name: create service account for remote access
   shell: |
@@ -278,7 +278,7 @@
     && export TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
     && export TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
     &&  kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN \
-    && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://{{nginx_ingress.dns_name }}:6443 --insecure-skip-tls-verify \
+    && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://{{ nginx_ingress.dns_name }}:6443 --insecure-skip-tls-verify \
     && kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin \
     && kubectl config --kubeconfig=/etc/kubeconfig use-context public
   environment:
