@@ -19,6 +19,11 @@
     host: "{{ kube_api_server }}"
     port: 6443
 
+- name: Add the br_netfilter module
+  modprobe:
+    name: br_netfilter
+    state: present
+
 - name: Let iptables see bridged traffic.
   sysctl:
     name: "{{ item }}"
