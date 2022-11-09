@@ -135,7 +135,6 @@
     with_items:
       - helm repo add jetstack https://charts.jetstack.io
       - helm repo update
-      - kubectl apply -f /etc/cert-manager-namespace.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
         cert-manager jetstack/cert-manager \
         -n cert-manager --create-namespace \
@@ -230,7 +229,6 @@
     with_items:
       - helm repo add grafana https://grafana.github.io/helm-charts
       - helm repo update
-      - kubectl apply -f /etc/grafana-namespace.yml
       - kubectl apply -n grafana -f /etc/grafana-secret.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
         grafana grafana/grafana \
