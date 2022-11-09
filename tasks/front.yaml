@@ -27,6 +27,7 @@
   loop:
     - net.bridge.bridge-nf-call-iptables
     - net.bridge.bridge-nf-call-ip6tables
+    - net.ipv4.ip_forward
   notify: sysctl-system
 
 - name: install flannel
@@ -35,10 +36,6 @@
   #     path: /etc/sysctl.d/k8s.conf
   #     regexp: '^net.bridge.bridge-nf-call-iptables'
   #     line: 'net.bridge.bridge-nf-call-iptables = 1'
-  #     create: yes
-  # - lineinfile:
-  #     path: /proc/sys/net/ipv4/ip_forward
-  #     line: '1'
   #     create: yes
   # - blockinfile:
   #     path: /etc/modules-load.d/k8s.conf
