@@ -32,10 +32,12 @@
 - name: install calico
   block:
   - get_url:
-      url: https://docs.projectcalico.org/manifests/custom-resources.yaml
+      # url: https://docs.projectcalico.org/manifests/custom-resources.yaml
+      url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.5/manifests/custom-resources.yaml
       dest: /etc/kube-calico-crds.yml
   - get_url:
-      url: https://docs.projectcalico.org/manifests/tigera-operator.yaml 
+      # url: https://docs.projectcalico.org/manifests/tigera-operator.yaml
+      url: https://raw.githubusercontent.com/projectcalico/calico/v3.24.5/manifests/tigera-operator.yaml
       dest: /etc/kube-calico-operator.yml
   - command: "{{ item }}"
     with_items:

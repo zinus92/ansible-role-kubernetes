@@ -11,7 +11,7 @@ kube_token_ttl: 0
 # POD network cidr
 kube_pod_network_cidr: 10.244.0.0/16
 
-network_manager: flannel
+network_manager: calico
 # Kubelet extra args
 kubelet_extra_args: ''
 # Kube API server options
