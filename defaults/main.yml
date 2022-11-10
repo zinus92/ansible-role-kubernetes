@@ -24,7 +24,7 @@ nginx_ingress:
     enabled: true
     master_private_ip: 0.0.0.0
     master_public_ip: 0.0.0.0
-    dns_name: ""
+    dns_name: "myip.cloud.infn.it"
 
 # Helm version
 #kube_install_helm_version: "v3.9.4"
@@ -39,19 +39,13 @@ kube_install_metrics: true
 kube_flanneld_extra_args: []
 
 node_name: AUTO
-
 nodelabel: ""
 
 nginx_ingress_helm_version: 4.3.0
-
 cert_manager_helm_version: v1.10.0
 cert_manager_type: self-signed # or letsencrypt-staging or letsencript-prod
 cert_manager_email: '' # used only for letsencrypt 
-
 dashboard_helm_version: 5.11.0
-
 prometheus_helm_version: 15.17.0
-
 kube_eagle_helm_version: 2.0.0
-
 grafana_helm_version:  6.43.3

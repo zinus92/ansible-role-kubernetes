@@ -14,7 +14,7 @@ ingress:
     - "{{ nginx_ingress.dns_name }}"
     tls:
     - hosts:
-        - "{{nginx_ingress.dns_name }}"
+        - "{{ nginx_ingress.dns_name }}"
       secretName: dash-selfsigned
 
 metricsScraper:

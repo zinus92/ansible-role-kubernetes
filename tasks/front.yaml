@@ -32,11 +32,9 @@
 - name: install calico
   block:
   - get_url:
-      # url: https://docs.projectcalico.org/manifests/custom-resources.yaml
       url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/custom-resources.yaml"
       dest: /etc/kube-calico-crds.yml
   - get_url:
-      # url: https://docs.projectcalico.org/manifests/tigera-operator.yaml
       url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml"
       dest: /etc/kube-calico-operator.yml
   - command: "{{ item  }}"
@@ -119,12 +117,9 @@
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        ingress-nginx \
-        ingress-nginx/ingress-nginx \
-        --set controller.allowSnippetAnnotations=false \
-        -n ingress-nginx --create-namespace \
-        --version {{ nginx_ingress_helm_version }} \
-        --values /etc/nginx-ingress-values.yml"
+        ingress-nginx ingress-nginx/ingress-nginx \
+        --set controller.allowSnippetAnnotations=false -n ingress-nginx --create-namespace \
+        --version {{ nginx_ingress_helm_version }} --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
 
 - name: install cert manager
@@ -136,10 +131,8 @@
       - helm repo add jetstack https://charts.jetstack.io
       - helm repo update
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        cert-manager jetstack/cert-manager \
-        -n cert-manager --create-namespace \
-        --version {{ cert_manager_helm_version }} \
-        --set installCRDs=true"
+        cert-manager jetstack/cert-manager -n cert-manager --create-namespace \
+        --version {{ cert_manager_helm_version }} --set installCRDs=true"
   when: nginx_ingress.enabled
 
 - name: wait Cert-Manager to start
@@ -177,10 +170,8 @@
       - helm repo update
       - kubectl apply -f /etc/metric-server.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        dashboard kubernetes-dashboard/kubernetes-dashboard \
-        -n kube-system \
-        --version {{ dashboard_helm_version }} \
-        --values /etc/dashboard-values.yml"
+        dashboard kubernetes-dashboard/kubernetes-dashboard -n kube-system \
+        --version {{ dashboard_helm_version }} --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
 
 - name: install prometheus
@@ -195,10 +186,8 @@
       - helm repo add prometheus https://prometheus-community.github.io/helm-charts
       - helm repo update
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        prometheus prometheus/prometheus \
-        -n prometheus --create-namespace \
-        --version {{ prometheus_helm_version }} \
-        --values /etc/prometheus-values.yml"
+        prometheus prometheus/prometheus -n prometheus --create-namespace \
+        --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
   when: nginx_ingress.enabled
 
 - name: install kube-eagle 
@@ -211,8 +200,7 @@
       - helm repo update
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
         kube-eagle kube-eagle/kube-eagle \
-        --version {{ kube_eagle_helm_version }} \
-        -n kube-eagle --create-namespace"
+        --version {{ kube_eagle_helm_version }} -n kube-eagle --create-namespace"
   when: nginx_ingress.enabled
 
 - name: install grafana 
@@ -231,10 +219,8 @@
       - helm repo update
       - kubectl apply -n grafana -f /etc/grafana-secret.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        grafana grafana/grafana \
-        -n grafana --create-namespace \
-        --version {{ grafana_helm_version }}
-        --values /etc/grafana-values.yml"
+        grafana grafana/grafana -n grafana --create-namespace \
+        --version {{ grafana_helm_version }} --values /etc/grafana-values.yml"
   when: nginx_ingress.enabled
 
 - name: copy empty kubeconfig
