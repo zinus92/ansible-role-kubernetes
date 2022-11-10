@@ -21,10 +21,10 @@ kube_apiserver_options: []
 # Flag to set HELM to be installed
 kube_install_helm: true
 nginx_ingress:
-    enabled: true
+    enabled: false
     master_private_ip: 0.0.0.0
     master_public_ip: 0.0.0.0
-    dns_name: "myip.cloud.infn.it"
+    dns_name: ""
 
 # Helm version
 #kube_install_helm_version: "v3.9.4"
