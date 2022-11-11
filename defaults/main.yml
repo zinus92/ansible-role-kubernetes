@@ -21,10 +21,10 @@ kube_apiserver_options: []
 # Flag to set HELM to be installed
 kube_install_helm: true
 nginx_ingress:
-    enabled: false
-    master_private_ip: 0.0.0.0
-    master_public_ip: 0.0.0.0
-    dns_name: ""
+  enabled: true
+  master_private_ip: 0.0.0.0
+  master_public_ip: 0.0.0.0
+  dns_name: ''
 
 # Helm version
 #kube_install_helm_version: "v3.9.4"
@@ -39,7 +39,7 @@ kube_install_metrics: true
 kube_flanneld_extra_args: []
 
 node_name: AUTO
-nodelabel: ""
+nodelabel: ''
 
 nginx_ingress_helm_version: 4.3.0
 cert_manager_helm_version: v1.10.0
