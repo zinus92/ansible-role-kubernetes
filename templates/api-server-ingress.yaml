@@ -14,10 +14,9 @@ spec:
   tls:
     - secretName: kubernetes-api-cert
       hosts:    
-        - {{nginx_ingress.dns_name }}
-
+        - "{{ nginx_ingress.dns_name }}"
   rules:
-  - host: {{nginx_ingress.dns_name }}
+  - host: "{{ nginx_ingress.dns_name }}"
     http:
       paths:
       - path: "/"
