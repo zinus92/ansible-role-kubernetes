@@ -247,7 +247,7 @@
     && export TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
     && export TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
     &&  kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN \
-    && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://{{ nginx_ingress.dns_name }}:6443 --insecure-skip-tls-verify \
+    && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://api-kubernetes.{{ dns_name }}:6443 --insecure-skip-tls-verify \
     && kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin \
     && kubectl config --kubeconfig=/etc/kubeconfig use-context public
   environment:
