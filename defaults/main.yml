@@ -42,7 +42,7 @@ node_name: AUTO
 nodelabel: ''
 
 nginx_ingress_helm_version: 4.3.0
-cert_manager_helm_version: 1.10.0
+cert_manager_helm_version: v1.10.0
 cert_manager_type: self-signed # or letsencrypt-staging or letsencript-prod
 cert_manager_email: '' # used only for letsencrypt 
 dashboard_helm_version: 5.11.0
