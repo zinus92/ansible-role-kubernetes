@@ -31,19 +31,10 @@
 
 - name: install calico
   block:
-  # - get_url:
-  #     url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml"
-  #     dest: /etc/kube-calico-operator.yml
   - get_url:
-      # url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/custom-resources.yaml"
-      # dest: /etc/kube-calico-crds.yml
       url: https://docs.projectcalico.org/manifests/calico.yaml
       dest: /etc/kube-calico.yml
   - command: kubectl apply -f /etc/kube-calico.yml
-  # - command: "{{ item }}"
-  #   with_items:
-  #     - 'kubectl create -f /etc/kube-calico-operator.yml'
-  #     - 'kubectl create -f /etc/kube-calico-crds.yml'
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
   when: network_manager == "calico"
