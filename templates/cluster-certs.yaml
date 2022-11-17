@@ -13,9 +13,9 @@ metadata:
 spec:
   acme:
     # The ACME server URL
-    server: {{ acme_server_url }} #https://acme-v02.api.letsencrypt.org/directory
+    server: "{{ acme_server_url }}"
     # Email address used for ACME registration
-    email: {{ acme_email }}
+    email: "{{ acme_email }}"
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt

@@ -147,7 +147,6 @@
   - command: "kubectl apply -f /etc/cluster-certs.yml"
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
-  when: nginx_ingress.enabled
 
 - name: install dashboard
   block:
