@@ -39,7 +39,7 @@
       dest: /etc/kube-calico-crds.yml
   - command: "{{ item }}"
     with_items:
-      - 'kubectl apply -f /etc/kube-calico-operator.yml'
+      - 'kubectl create -f /etc/kube-calico-operator.yml'
       - 'kubectl create -f /etc/kube-calico-crds.yml'
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
