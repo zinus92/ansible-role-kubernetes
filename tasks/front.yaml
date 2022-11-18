@@ -59,7 +59,9 @@
     port: 6443
 
 - name: Set iptables for ingress floatingIPs
-  - command: 'iptables -F'
+  block:
+  - name: Delete all rules in all chains
+    iptables: flush
   - name: 'iptables -A FORWARD -p tcp -d {{ nginx_ingress.master_private_ip }} --dport 443,80 -j ACCEPT'
     iptables:
       chain: FORWARD
@@ -91,7 +93,8 @@
       source: '! 127.0.0.1'
       jump: MASQUERADE
       comment: "managed by kubernetes ansible role"
-  - command: 'iptables-save'
+  - name: save iptable configuration
+    command: 'iptables-save'
 
 - name: wait Kube to start
   wait_for:
