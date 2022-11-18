@@ -61,7 +61,8 @@
 - name: Set iptables for ingress floatingIPs
   block:
   - name: Delete all rules in all chains
-    iptables: flush
+    iptables: 
+      flush: yes
   - name: 'iptables -A FORWARD -p tcp -d {{ nginx_ingress.master_private_ip }} --dport 443,80 -j ACCEPT'
     iptables:
       chain: FORWARD
