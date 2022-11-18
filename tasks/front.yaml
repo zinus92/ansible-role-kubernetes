@@ -138,6 +138,7 @@
   when: nginx_ingress.enabled
 
 - name: define cluster issuer
+  block:
   - template:
       src: cluster-certs.yaml
       dest: /etc/cluster-certs.yml 
