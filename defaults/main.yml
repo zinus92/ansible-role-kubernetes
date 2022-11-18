@@ -48,4 +48,4 @@ cert_manager_email: '' # used only for letsencrypt
 dashboard_helm_version: 5.11.0
 prometheus_helm_version: 15.17.0
 kube_eagle_helm_version: 2.0.0
-grafana_helm_version:  6.43.3
+grafana_helm_version:  6.44.2
