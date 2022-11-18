@@ -59,40 +59,39 @@
     port: 6443
 
 - name: Set iptables for ingress floatingIPs
-  block:
-    - command: iptables -F
-    - name: 'iptables -A FORWARD -p tcp -d {{ nginx_ingress.master_private_ip }} --dport 443,80 -j ACCEPT'
-      iptables:
-        chain: FORWARD
-        protocol: tcp
-        destination: "{{ nginx_ingress.master_private_ip }}"
-        destination_port: "{{ item }}"
-        jump: ACCEPT
-        comment: "managed by kubernetes ansible role"
-      loop:
-        - 443
-        - 80        
-    - name: 'iptables -t nat -A PREROUTING -p tcp -d {{ nginx_ingress.master_public_ip }} --dport 443,80 -j DNAT --to-destination {{ nginx_ingress.master_private_ip }}:443,80'
-      iptables:
-        table: nat
-        chain: PREROUTING
-        protocol: tcp
-        destination: "{{ nginx_ingress.master_public_ip }}"
-        destination_port: "{{ item }}"
-        jump: DNAT
-        to_destination: "{{ nginx_ingress.master_private_ip }}:{{ item }}"
-        comment: "managed by kubernetes ansible role"
-      loop:
-        - 443
-        - 80              
-    - name: 'iptables -t nat -A POSTROUTING ! -s 127.0.0.1 -j MASQUERADE'
-      iptables:
-        table: nat     
-        chain: POSTROUTING
-        source: '! 127.0.0.1'
-        jump: MASQUERADE
-        comment: "managed by kubernetes ansible role"
-    - command: iptables-save
+  - command: iptables -F
+  - name: 'iptables -A FORWARD -p tcp -d {{ nginx_ingress.master_private_ip }} --dport 443,80 -j ACCEPT'
+    iptables:
+      chain: FORWARD
+      protocol: tcp
+      destination: "{{ nginx_ingress.master_private_ip }}"
+      destination_port: "{{ item }}"
+      jump: ACCEPT
+      comment: "managed by kubernetes ansible role"
+    loop:
+      - 443
+      - 80        
+  - name: 'iptables -t nat -A PREROUTING -p tcp -d {{ nginx_ingress.master_public_ip }} --dport 443,80 -j DNAT --to-destination {{ nginx_ingress.master_private_ip }}:443,80'
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination: "{{ nginx_ingress.master_public_ip }}"
+      destination_port: "{{ item }}"
+      jump: DNAT
+      to_destination: "{{ nginx_ingress.master_private_ip }}:{{ item }}"
+      comment: "managed by kubernetes ansible role"
+    loop:
+      - 443
+      - 80              
+  - name: 'iptables -t nat -A POSTROUTING ! -s 127.0.0.1 -j MASQUERADE'
+    iptables:
+      table: nat     
+      chain: POSTROUTING
+      source: '! 127.0.0.1'
+      jump: MASQUERADE
+      comment: "managed by kubernetes ansible role"
+  - command: iptables-save
 
 - name: wait Kube to start
   wait_for:
@@ -110,37 +109,32 @@
     with_items:
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        ingress-nginx ingress-nginx/ingress-nginx \
-        --set controller.allowSnippetAnnotations=false -n ingress-nginx --create-namespace \
-        --version {{ nginx_ingress_helm_version }} --values /etc/nginx-ingress-values.yml"
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s ingress-nginx ingress-nginx/ingress-nginx --set controller.allowSnippetAnnotations=false \
+        -n ingress-nginx --create-namespace --version {{ nginx_ingress_helm_version }} --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
 
 - name: install cert manager
-  block:
-  - command: "{{ item }}"
-    environment:
-      KUBECONFIG: /etc/kubernetes/admin.conf
-    with_items:
-      - helm repo add jetstack https://charts.jetstack.io
-      - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        cert-manager jetstack/cert-manager -n cert-manager --create-namespace \
-        --version {{ cert_manager_helm_version }} --set installCRDs=true"
+  command: "{{ item }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  with_items:
+    - helm repo add jetstack https://charts.jetstack.io
+    - helm repo update
+    - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s cert-manager jetstack/cert-manager \
+      -n cert-manager --create-namespace --version {{ cert_manager_helm_version }} --set installCRDs=true"
   when: nginx_ingress.enabled
 
 - name: wait Cert-Manager to start
   command: kubectl get deployment -n cert-manager -l 'app=webhook' -o 'jsonpath={.items[0].status.readyReplicas}'
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
   register: cert_manager_webhook_deployment_status
   until: (cert_manager_webhook_deployment_status.stdout | default(0) | int) >= 1
   retries: 30
   delay: 15
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
   when: nginx_ingress.enabled
 
 - name: define cluster issuer
-  block:
   - template:
       src: cluster-certs.yaml
       dest: /etc/cluster-certs.yml 
@@ -163,9 +157,8 @@
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
       - kubectl apply -f /etc/metric-server.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        dashboard kubernetes-dashboard/kubernetes-dashboard -n kube-system \
-        --version {{ dashboard_helm_version }} --values /etc/dashboard-values.yml"
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s dashboard kubernetes-dashboard/kubernetes-dashboard \
+        -n kube-system --version {{ dashboard_helm_version }} --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
 
 - name: install prometheus
@@ -179,22 +172,19 @@
     with_items:
       - helm repo add prometheus https://prometheus-community.github.io/helm-charts
       - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        prometheus prometheus/prometheus -n prometheus --create-namespace \
-        --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s prometheus prometheus/prometheus -n prometheus \
+        --create-namespace --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
   when: nginx_ingress.enabled
 
 - name: install kube-eagle 
-  block:
-  - command: "{{ item }}"
-    environment:
-      KUBECONFIG: /etc/kubernetes/admin.conf
-    with_items:
-      - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
-      - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        kube-eagle kube-eagle/kube-eagle \
-        --version {{ kube_eagle_helm_version }} -n kube-eagle --create-namespace"
+  command: "{{ item }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  with_items:
+    - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
+    - helm repo update
+    - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s kube-eagle kube-eagle/kube-eagle \
+      --version {{ kube_eagle_helm_version }} -n kube-eagle --create-namespace"
   when: nginx_ingress.enabled
 
 - name: install grafana 
@@ -212,9 +202,8 @@
       - helm repo add grafana https://grafana.github.io/helm-charts
       - helm repo update
       - kubectl apply -n grafana -f /etc/grafana-secret.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-        grafana grafana/grafana -n grafana --create-namespace \
-        --version {{ grafana_helm_version }} --values /etc/grafana-values.yml"
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s grafana grafana/grafana \
+        -n grafana --create-namespace --version {{ grafana_helm_version }} --values /etc/grafana-values.yml"
   when: nginx_ingress.enabled
 
 - name: copy empty kubeconfig
