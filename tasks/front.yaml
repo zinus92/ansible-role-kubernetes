@@ -95,7 +95,9 @@
       jump: MASQUERADE
       comment: "managed by kubernetes ansible role"
   - name: save iptable configuration
-    command: 'iptables-save'
+    iptables:
+      state: saved
+      path: /etc/sysconfig/iptables
 
 - name: wait Kube to start
   wait_for:
