@@ -118,18 +118,14 @@
   when: nginx_ingress.enabled
 
 - name: install cert manager
-  block:
-  - template:
-      src: templates/cert-values.yaml
-      dest: /etc/cert-values.yml
-  - command: "{{ item }}"
-    environment:
-      KUBECONFIG: /etc/kubernetes/admin.conf
-    with_items:
+  command: "{{ item }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  with_items:
     - helm repo add jetstack https://charts.jetstack.io
     - helm repo update
-    - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s cert-manager jetstack/cert-manager -n cert-manager --create-namespace \
-      --version {{ cert_manager_helm_version }} --set installCRDs=true --values /etc/cert-values.yml"
+    - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s cert-manager jetstack/cert-manager \
+      -n cert-manager --create-namespace --version {{ cert_manager_helm_version }} --set installCRDs=true"
   when: nginx_ingress.enabled
 
 - name: wait Cert-Manager to start
