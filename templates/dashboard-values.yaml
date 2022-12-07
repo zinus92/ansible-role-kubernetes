@@ -1,14 +1,14 @@
 service:
-    externalPort: 9090
+  externalPort: 9090
 
 ingress:
-    annotations:
-      kubernetes.io/ingress.class: "nginx"
-      cert-manager.io/cluster-issuer: "{{ cluster_issuer_name }}"
-    enabled: true
-    hosts: 
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "{{ cluster_issuer_name }}"
+  enabled: true
+  hosts: 
     - "dashboard.{{ dns_name }}"
-    tls:
+  tls:
     - hosts:
         - "dashboard.{{ dns_name }}"
       secretName: dash-selfsigned
