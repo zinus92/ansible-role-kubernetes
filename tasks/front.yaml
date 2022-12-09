@@ -145,7 +145,7 @@
 - name: define cluster issuer
   block:
   - template:
-      src: cluster-certs.yaml
+      src: templates/cluster-certs.yaml
       dest: /etc/cluster-certs.yml 
   - command: kubectl apply -f /etc/cluster-certs.yml
     environment:
