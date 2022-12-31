@@ -1,0 +1,19 @@
+---
+- name: Set Ansible Galaxy Nvidia Role name fact
+  ansible.builtin.set_fact:
+    nvidia_role_name: "{{ nvidia_role.split('/') | last }}"
+
+- name: Print Ansible Galaxy Nvidia Role facts
+  ansible.builtin.debug:
+    msg: "nvidia_role: {{ nvidia_role }}, nvidia_role_name: {{ nvidia_role_name }}"
+
+- name: Install Ansible Galaxy Nvidia Role on Control node
+  delegate_to: 127.0.0.1
+  ansible.builtin.command: ansible-galaxy install -f -i -c {{ nvidia_role }}
+  register: cmd_nvidia_role_output
+  changed_when: cmd_nvidia_role_output.rc == 0
+
+- name: Include Ansible Galaxy Nvidia Role
+  ansible.builtin.include_role:
+    # name: ansible-role-nvidia
+    name: "{{ nvidia_role_name }}"
