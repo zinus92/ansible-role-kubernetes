@@ -17,3 +17,6 @@
   ansible.builtin.include_role:
     # name: ansible-role-nvidia
     name: "{{ nvidia_role_name }}"
+  vars:
+    node_type: "{{ (kube_type_of_node == 'wn') | ternary('worker', 'master') }}"
+    node_cluster_type: "kubernetes"
