@@ -9,12 +9,9 @@
 - name: Include tasks for OS family {{ ansible_os_family }}
   ansible.builtin.include_tasks: "{{ ansible_os_family }}.yaml"
 
-- name: Install Nvidia stuff
-  ansible.builtin.include_tasks: nvidia.yaml
-  when: (use_gpu | default(false) | bool)
-
 - name: Include tasks for node type {{ kube_type_of_node }}
   ansible.builtin.include_tasks: "{{ kube_type_of_node }}.yaml"
 
-# - name: Include "{{kube_type_of_node}}" tasks
-#   include: "{{kube_type_of_node}}.yaml"
+- name: Add GPU support for node type {{ kube_type_of_node }}
+  ansible.builtin.include_tasks: gpu-support.yaml
+  when: (enable_gpu | default(false) | bool)

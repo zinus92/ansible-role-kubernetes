@@ -52,6 +52,6 @@ kube_eagle_helm_version: 2.0.0
 
 grafana_helm_version:  6.30.3
 
-# Add GPU acceleration
-use_gpu: false
-nvidia_role: ansible-role-nvidia
+# Properties related to GPU support
+enable_gpu: false
+gpu_support_role: ansible-role-gpu-support

@@ -4,19 +4,19 @@
   failed_when: false
   changed_when: false
 
-- name: Report installed pip version
+- name: Log installed pip version on remote node
   ansible.builtin.debug:
     msg: "{{ cmd_pip_version_output.stdout }}"
   when: cmd_pip_version_output.rc == 0
 
 - name: Gather installed ansible version on Control node
-  ansible.builtin.command: pip show ansible
   delegate_to: 127.0.0.1
+  ansible.builtin.command: pip show ansible
   register: cmd_ansible_version_output
   failed_when: false
   changed_when: false
 
-- name: Report installed ansible version
+- name: Log installed ansible version on Control node
   ansible.builtin.debug:
     msg: "{{ cmd_ansible_version_output.stdout }}"
   when: cmd_ansible_version_output.rc == 0

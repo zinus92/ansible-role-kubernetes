@@ -34,6 +34,15 @@ The variables that can be passed to this role and a brief description about them
 	kube_apply_repos: []
 	# Flag to set Metrics-Server to be installed
 	kube_install_metrics: false
+	# Flag to enable GPU support
+	enable_gpu: false
+	# Name (and version) of the Ansible Galaxy role to include if `enable_gpu == true'
+	gpu_support_role: ansible-role-gpu-support
+
+Dependencies
+------------
+
+- ansible-role-gpu-support (if `enable_gpu == true`)
 
 Example Playbook
 ----------------
@@ -41,4 +50,3 @@ Example Playbook
 This an example of how to install this role in the front-end node:
 
 And in the WNs:
-
