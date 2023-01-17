@@ -210,9 +210,9 @@
     with_items:
       - helm repo add grafana https://grafana.github.io/helm-charts
       - helm repo update
-      - kubectl apply -n grafana -f /etc/grafana-secret.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s grafana grafana/grafana \
         -n grafana --create-namespace --version {{ grafana_helm_version }} --values /etc/grafana-values.yml"
+      - kubectl apply -n grafana -f /etc/grafana-secret.yml
   when: nginx_ingress.enabled
 
 - name: copy empty kubeconfig
