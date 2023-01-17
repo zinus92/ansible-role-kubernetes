@@ -41,11 +41,11 @@ kube_flanneld_extra_args: []
 node_name: AUTO
 nodelabel: ''
 
-nginx_ingress_helm_version: 4.3.0
+nginx_ingress_helm_version: 4.4.2
 cert_manager_helm_version: v1.10.0
 cert_manager_type: self-signed # or letsencrypt-staging or letsencript-prod
 cert_manager_email: '' # used only for letsencrypt 
-dashboard_helm_version: 5.11.0
-prometheus_helm_version: 15.17.0
+dashboard_helm_version: 6.0.0
+prometheus_helm_version: 19.3.1
 kube_eagle_helm_version: 2.0.0
-grafana_helm_version:  6.44.2
+grafana_helm_version:  6.50.0
