@@ -49,4 +49,4 @@ dashboard_helm_version: 6.0.0
 prometheus_helm_version: 19.3.3
 kube_eagle_helm_version: 2.0.0
 grafana_helm_version:  6.50.6
-calico_version: v3.25
+calico_version: v3.24
