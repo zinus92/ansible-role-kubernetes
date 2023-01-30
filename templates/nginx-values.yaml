@@ -5,5 +5,3 @@ controller:
       - "{{ nginx_ingress.master_public_ip }}"
     type: ClusterIP
   hostNetwork: true
-  # admissionWebhooks:
-  #   enable: false

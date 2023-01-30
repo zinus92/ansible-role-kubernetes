@@ -32,8 +32,7 @@
 - name: install calico
   block:
   - get_url:
-      url: https://docs.projectcalico.org/manifests/calico.yaml
-      #url: https://projectcalico.docs.tigera.io/archive/v3.23/manifests/calico.yaml
+      url: https://projectcalico.docs.tigera.io/archive/{{ calico_version }}/manifests/calico.yaml
       dest: /etc/kube-calico.yml
   - command: kubectl apply -f /etc/kube-calico.yml
     environment:
