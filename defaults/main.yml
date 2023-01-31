@@ -43,7 +43,7 @@ nodelabel: ''
 
 nginx_ingress_helm_version: 4.4.2
 cert_manager_helm_version: v1.10.0
-cert_manager_type: self-signed # or letsencrypt-staging or letsencript-prod
+cert_manager_type: self-signed # or letsencrypt-staging or letsencrypt-prod
 cert_manager_email: '' # used only for letsencrypt 
 dashboard_helm_version: 6.0.0
 prometheus_helm_version: 19.3.3
