@@ -12,9 +12,9 @@ metadata:
     nginx.ingress.kubernetes.io/backend-protocol:  "HTTPS"
 spec:
   tls:
-    - secretName: kubernetes-api-cert
-      hosts:    
-        - "api-kubernetes.{{ dns_name }}"
+  - secretName: kubernetes-api-cert
+    hosts:    
+    - "api-kubernetes.{{ dns_name }}"
   rules:
   - host: "api-kubernetes.{{ dns_name }}"
     http:

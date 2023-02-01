@@ -7,11 +7,11 @@ ingress:
     cert-manager.io/cluster-issuer: "{{ cluster_issuer_name }}"
   enabled: true
   hosts: 
-    - "dashboard.{{ dns_name }}"
+  - "dashboard.{{ dns_name }}"
   tls:
-    - hosts:
-        - "dashboard.{{ dns_name }}"
-      secretName: dash-selfsigned
+  - hosts:
+    - "dashboard.{{ dns_name }}"
+    secretName: dash-selfsigned
 
 metricsScraper:
   enabled: true

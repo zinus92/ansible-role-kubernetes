@@ -28,7 +28,6 @@ dns_name: "{{ nginx_ingress.master_public_ip }}.{{ nginx_ingress.domain }}"
 
 # Deploy the Dashboard
 kube_deploy_dashboard: k8s
-    # or rancher
 # Value to pass to the kubeadm init --apiserver-advertise-address option
 kube_api_server: 0.0.0.0
 # Flag to set Metrics-Server to be installed
@@ -42,7 +41,7 @@ nodelabel: ''
 helm_version: v3.10.3
 nginx_ingress_helm_version: 4.4.2
 cert_manager_helm_version: v1.10.0
-cert_manager_type: letsencrypt-prod # [self-signed, letsencrypt-staging, letsencrypt-prod]
+cert_manager_type: self-signed # [self-signed, letsencrypt-staging, letsencrypt-prod]
 cert_manager_email: '' # used only for letsencrypt 
 dashboard_helm_version: 6.0.0
 prometheus_helm_version: 19.3.3

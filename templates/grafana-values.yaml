@@ -48,11 +48,11 @@ ingress:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: "{{ cluster_issuer_name }}"
   hosts:
-    - "grafana.{{ dns_name }}"
+  - "grafana.{{ dns_name }}"
   tls:
-    - hosts:
-      - "grafana.{{ dns_name }}"
-      secretName: grafana-selfsigned
+  - hosts:
+    - "grafana.{{ dns_name }}"
+    secretName: grafana-selfsigned
 grafana.ini:
   security:
     cookie_secure: true
