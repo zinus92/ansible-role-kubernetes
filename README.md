@@ -36,8 +36,8 @@ The variables that can be passed to this role and a brief description about them
 	kube_install_metrics: false
 	# Flag to enable GPU support
 	enable_gpu: false
-	# Name (and version) of the Ansible Galaxy role to include if `enable_gpu == true'
-	gpu_support_role: ansible-role-gpu-support
+	# Name (and version) of the Ansible role to include if `enable_gpu == true'
+	gpu_support_role: git+https://baltig.infn.it/infn-cloud/ansible-role-gpu-support,vX.Y.Z
 
 Dependencies
 ------------

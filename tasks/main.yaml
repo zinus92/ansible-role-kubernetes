@@ -3,8 +3,8 @@
   ansible.builtin.command: swapoff -a
   changed_when: false
 
-- name: Include debug info tasks
-  ansible.builtin.include_tasks: debug-info.yaml
+# - name: Include debug info tasks
+#   ansible.builtin.include_tasks: debug-info.yaml
 
 - name: Include tasks for OS family {{ ansible_os_family }}
   ansible.builtin.include_tasks: "{{ ansible_os_family }}.yaml"

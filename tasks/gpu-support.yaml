@@ -1,13 +1,14 @@
 ---
-- name: Set Ansible Galaxy GPU Support Role name fact
+- name: Set ansible-role-gpu-support role name fact
   ansible.builtin.set_fact:
-    gpu_support_role_name: "{{ gpu_support_role.split('/') | last }}"
+    gpu_support_role_name: "{{ (gpu_support_role.split('/') | last).split(',') | first }}"
 
-- name: Print Ansible Galaxy GPU Support Role facts
+- name: Print ansible-role-gpu-support role facts
   ansible.builtin.debug:
-    msg: "gpu_support_role: {{ gpu_support_role }}, gpu_support_role_name: {{ gpu_support_role_name }}"
+    msg: >
+      gpu_support_role: '{{ gpu_support_role }}', gpu_support_role_name: '{{ gpu_support_role_name }}'
 
-- name: Install Ansible Galaxy GPU Support Role on Control node
+- name: Install ansible-role-gpu-support on Control node
   delegate_to: 127.0.0.1
   ansible.builtin.command: ansible-galaxy install -f -i -c {{ gpu_support_role }}
   register: gpu_support_role_install
@@ -15,7 +16,7 @@
     gpu_support_role_install.rc == 0 and
     ('is already installed, skipping' not in gpu_support_role_install.stdout)
 
-- name: Include Ansible Galaxy GPU Support Role
+- name: Include ansible-role-gpu-support
   ansible.builtin.include_role:
     # name: ansible-role-gpu-support
     name: "{{ gpu_support_role_name }}"

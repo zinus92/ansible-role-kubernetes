@@ -54,4 +54,4 @@ grafana_helm_version:  6.30.3
 
 # Properties related to GPU support
 enable_gpu: false
-gpu_support_role: ansible-role-gpu-support
+gpu_support_role: git+https://baltig.infn.it/infn-cloud/ansible-role-gpu-support,v1.0.0
