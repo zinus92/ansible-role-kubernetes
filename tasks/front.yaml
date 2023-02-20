@@ -228,18 +228,21 @@
 #     - kubectl apply -f /etc/api-server-ingress.yaml
 
 - name: create service account for remote access
-  shell: |
-    kubectl -n kube-system create --dry-run=client serviceaccount admin -o yaml | kubectl apply -f - \
-    && kubectl create --dry-run=client clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin -o yaml | kubectl apply -f - \
-    && sleep 30 \
-    && export TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
-    && export TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
-    && kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN \
-    && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://api-kubernetes.{{ dns_name }}:6443 --insecure-skip-tls-verify \
-    && kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin \
-    && kubectl config --kubeconfig=/etc/kubeconfig use-context public
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+  block:
+  - copy:
+      src: files/admin-cred.yaml
+      dest: /etc/admin-cred.yml
+  - command: "{{ item }}"
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+    with_items:
+      - kubectl apply -f /etc/admin-cred.yml
+      - kubectl create --dry-run=client clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin -o yaml | kubectl apply -f -
+      - export TOKEN=$(kubectl -n kube-system get secret admin-token -o jsonpath='{.data.token}' | base64 -d)
+      - kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN
+      - kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://api-kubernetes.{{ dns_name }}:6443 --insecure-skip-tls-verify
+      - kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin
+      - kubectl config --kubeconfig=/etc/kubeconfig use-context public
 
 - name: register kubeconfig
   shell: kubectl config --kubeconfig=/etc/kubeconfig view --raw
