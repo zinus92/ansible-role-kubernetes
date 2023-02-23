@@ -113,7 +113,7 @@
     with_items:
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s ingress-nginx ingress-nginx/ingress-nginx --set controller.allowSnippetAnnotations=false \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s ingress-nginx ingress-nginx/ingress-nginx --set controller.allowSnippetAnnotations=false \
         -n ingress-nginx --create-namespace --version {{ nginx_ingress_helm_version }} --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
 
@@ -124,7 +124,7 @@
   with_items:
     - helm repo add jetstack https://charts.jetstack.io
     - helm repo update
-    - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s cert-manager jetstack/cert-manager \
+    - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s cert-manager jetstack/cert-manager \
       -n cert-manager --create-namespace --version {{ cert_manager_helm_version }} --set installCRDs=true"
   when: nginx_ingress.enabled
 
@@ -162,7 +162,7 @@
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
       - kubectl apply -f /etc/metric-server.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s dashboard kubernetes-dashboard/kubernetes-dashboard \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s dashboard kubernetes-dashboard/kubernetes-dashboard \
         -n kube-system --version {{ dashboard_helm_version }} --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
 
@@ -177,7 +177,7 @@
     with_items:
       - helm repo add prometheus https://prometheus-community.github.io/helm-charts
       - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s prometheus prometheus/prometheus -n prometheus \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s prometheus prometheus/prometheus -n prometheus \
         --create-namespace --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
   when: nginx_ingress.enabled
 
@@ -188,7 +188,7 @@
   with_items:
     - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
     - helm repo update
-    - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s kube-eagle kube-eagle/kube-eagle \
+    - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s kube-eagle kube-eagle/kube-eagle \
       --version {{ kube_eagle_helm_version }} -n kube-eagle --create-namespace"
   when: nginx_ingress.enabled
 
@@ -206,7 +206,7 @@
     with_items:
       - helm repo add grafana https://grafana.github.io/helm-charts
       - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s grafana grafana/grafana \
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s grafana grafana/grafana \
         -n grafana --create-namespace --version {{ grafana_helm_version }} --values /etc/grafana-values.yml"
       - kubectl apply -n grafana -f /etc/grafana-secret.yml
   when: nginx_ingress.enabled
