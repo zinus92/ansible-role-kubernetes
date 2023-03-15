@@ -1,5 +1,5 @@
 ---
-- name: Install docker requisites
+- name: Install containerd requisites
   apt:
     pkg: 
       - apt-transport-https

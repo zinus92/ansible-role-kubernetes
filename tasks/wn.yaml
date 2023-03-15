@@ -25,20 +25,20 @@
 
 - name: Create auth data file with an admin user
   copy:
-    content: '{{kube_admin_token}},{{kube_admin_username}},100,"users,system:masters"'
+    content: '{{ kube_admin_token }},{{ kube_admin_username }},100,"users,system:masters"'
     dest: /etc/kubernetes/pki/auth
     mode: 600
 
 - name: Add node to kube cluster with node_name == {{ node_name }}
-  command: kubeadm join --node-name {{ node_name }} --token {{kube_token}} {{kube_server}}:6443 --discovery-token-unsafe-skip-ca-verification creates=/etc/kubernetes/kubelet.conf
-  when: node_name  != "AUTO"
+  command: kubeadm join --node-name {{ node_name }} --token {{ kube_token }} {{ kube_server }}:6443 --discovery-token-unsafe-skip-ca-verification creates=/etc/kubernetes/kubelet.conf
+  when: node_name != "AUTO"
 
 - name: Add node to kube cluster with node_name == {{ node_name }}
-  command: kubeadm join --token {{kube_token}} {{kube_server}}:6443 --discovery-token-unsafe-skip-ca-verification creates=/etc/kubernetes/kubelet.conf
+  command: kubeadm join --token {{ kube_token }} {{ kube_server }}:6443 --discovery-token-unsafe-skip-ca-verification creates=/etc/kubernetes/kubelet.conf
   when: node_name == "AUTO"
 
 - name: Reset iptables to blank slate
-  command: "{{item}}"
+  command: "{{ item }}"
   with_items:
     - "iptables -F"
     - "iptables-save"
@@ -46,7 +46,7 @@
 - name: Add KUBELET_EXTRA_ARGS
   lineinfile:
     dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    line: 'Environment="KUBELET_EXTRA_ARGS={{kubelet_extra_args}}"'
+    line: 'Environment="KUBELET_EXTRA_ARGS={{ kubelet_extra_args }}"'
     regexp: '^Environment="KUBELET_EXTRA_ARGS'
     insertafter: '\[Service\]'
   notify:

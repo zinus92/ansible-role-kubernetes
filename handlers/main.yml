@@ -22,8 +22,3 @@
   wait_for:
     port: 6443
   listen: "restart kubeapi"
-
-- name: restart docker
-  service:
-    name: docker
-    state: restarted

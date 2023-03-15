@@ -8,16 +8,15 @@ metadata:
     app: kubernetes
   annotations:
     kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: "selfsigned-issuer"
+    cert-manager.io/cluster-issuer: "{{ cluster_issuer_name }}"
     nginx.ingress.kubernetes.io/backend-protocol:  "HTTPS"
 spec:
   tls:
-    - secretName: kubernetes-api-cert
-      hosts:    
-        - api-kubernetes.{{nginx_ingress.master_public_ip }}.myip.cloud.infn.it
-
+  - secretName: kubernetes-api-cert
+    hosts:    
+    - "api-kubernetes.{{ dns_name }}"
   rules:
-  - host: api-kubernetes.{{nginx_ingress.master_public_ip }}.myip.cloud.infn.it
+  - host: "api-kubernetes.{{ dns_name }}"
     http:
       paths:
       - path: "/"

@@ -7,12 +7,12 @@
 
 - name: Create auth data file with an admin user
   copy:
-    content: '{{kube_admin_token}},{{kube_admin_username}},100,"users,system:masters"'
+    content: '{{ kube_admin_token }},{{ kube_admin_username }},100,"users,system:masters"'
     dest: /etc/kubernetes/pki/auth
     mode: 600
 
 - name: Kubeadm init
-  command: kubeadm init --pod-network-cidr={{kube_pod_network_cidr}} --token={{kube_token}} --token-ttl {{kube_token_ttl}} --apiserver-advertise-address={{kube_api_server}} creates=/etc/kubernetes/admin.conf
+  command: kubeadm init --pod-network-cidr={{ kube_pod_network_cidr }} --token={{ kube_token }} --token-ttl {{ kube_token_ttl }} --apiserver-advertise-address={{ kube_api_server }} creates=/etc/kubernetes/admin.conf
 
 - name: wait Kube to start
   wait_for:
@@ -21,12 +21,6 @@
 
 - name: install flannel
   block:
-  - lineinfile:
-      dest: /etc/sysctl.d/k8s.conf
-      regexp: '^net.bridge.bridge-nf-call-iptables'
-      line: 'net.bridge.bridge-nf-call-iptables = 1'
-      create: yes
-    notify: sysctl-system
   - template:
       src: templates/flannel.yaml
       dest: /etc/kube-flannel.yml
@@ -38,15 +32,9 @@
 - name: install calico
   block:
   - get_url:
-      url: https://docs.projectcalico.org/manifests/custom-resources.yaml
-      dest: /etc/kube-calico-crds.yml
-  - get_url:
-      url: https://docs.projectcalico.org/manifests/tigera-operator.yaml 
-      dest: /etc/kube-calico-operator.yml
-  - command: "{{item}}"
-    with_items:
-      - 'kubectl apply -f /etc/kube-calico-operator.yml'
-      - 'kubectl apply -f /etc/kube-calico-crds.yml'
+      url: https://projectcalico.docs.tigera.io/archive/{{ calico_version }}/manifests/calico.yaml
+      dest: /etc/kube-calico.yml
+  - command: kubectl apply -f /etc/kube-calico.yml
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
   when: network_manager == "calico"
@@ -58,9 +46,9 @@
 
 - name: Add Kube API server options
   lineinfile:
-    dest: /etc/kubernetes/manifests/kube-apiserver.yaml
-    line: '    - {{item.option}}={{item.value}}'
-    regexp: '^    - {{item.option}}='
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    line: '    - {{ item.option }}={{ item.value }}'
+    regexp: '^    - {{ item.option }}='
     insertafter: '    - kube-apiserver'
   notify: restart kubeapi
   with_items: "{{ kube_apiserver_options }}"
@@ -71,15 +59,43 @@
     port: 6443
 
 - name: Set iptables for ingress floatingIPs
-  command: "{{item}}"
-  with_items:
-    - 'iptables -F'
-    - 'iptables -A FORWARD -p tcp -d {{nginx_ingress.master_private_ip }} --dport 443 -j ACCEPT'
-    - 'iptables -A FORWARD -p tcp -d {{nginx_ingress.master_private_ip }} --dport 80 -j ACCEPT'
-    - 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 443 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:443'
-    - 'iptables -t nat -A PREROUTING -p tcp -d {{nginx_ingress.master_public_ip }} --dport 80 -j DNAT --to-destination {{nginx_ingress.master_private_ip }}:80'
-    - 'iptables -t nat -A POSTROUTING ! -s 127.0.0.1 -j MASQUERADE'
-    - 'iptables-save'
+  block:
+  - name: Delete all rules in all chains
+    iptables: 
+      flush: yes
+  - name: 'iptables -A FORWARD -p tcp -d {{ nginx_ingress.master_private_ip }} --dport 443,80 -j ACCEPT'
+    iptables:
+      chain: FORWARD
+      protocol: tcp
+      destination: "{{ nginx_ingress.master_private_ip }}"
+      destination_port: "{{ item }}"
+      jump: ACCEPT
+      comment: "managed by kubernetes ansible role"
+    loop:
+      - 443
+      - 80        
+  - name: 'iptables -t nat -A PREROUTING -p tcp -d {{ nginx_ingress.master_public_ip }} --dport 443,80 -j DNAT --to-destination {{ nginx_ingress.master_private_ip }}:443,80'
+    iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      destination: "{{ nginx_ingress.master_public_ip }}"
+      destination_port: "{{ item }}"
+      jump: DNAT
+      to_destination: "{{ nginx_ingress.master_private_ip }}:{{ item }}"
+      comment: "managed by kubernetes ansible role"
+    loop:
+      - 443
+      - 80              
+  - name: 'iptables -t nat -A POSTROUTING ! -s 127.0.0.1 -j MASQUERADE'
+    iptables:
+      table: nat     
+      chain: POSTROUTING
+      source: '! 127.0.0.1'
+      jump: MASQUERADE
+      comment: "managed by kubernetes ansible role"
+  - name: save iptable configuration
+    command: iptables-save
 
 - name: wait Kube to start
   wait_for:
@@ -88,183 +104,145 @@
 
 - name: install nginx ingress
   block:
-    - copy:
-        src: files/nginx-namespace.yaml
-        dest: /etc/nginx-namespace.yml
-    - template:
-        src: templates/nginx-values.yaml
-        dest: /etc/nginx-ingress-values.yml
-    - command: "{{ item }}"
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      with_items:
+  - template:
+      src: templates/nginx-values.yaml
+      dest: /etc/nginx-ingress-values.yml
+  - command: "{{ item }}"
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+    with_items:
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
-      - kubectl apply -f  /etc/nginx-namespace.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-                              ingress-nginx \
-                              ingress-nginx/ingress-nginx \
-                              --set controller.allowSnippetAnnotations=false \
-                              --namespace=ingress-nginx \
-                              --version {{ nginx_ingress_helm_version }} \
-                              --values /etc/nginx-ingress-values.yml"
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s ingress-nginx ingress-nginx/ingress-nginx --set controller.allowSnippetAnnotations=false \
+        -n ingress-nginx --create-namespace --version {{ nginx_ingress_helm_version }} --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
 
 - name: install cert manager
-  block:
-    - copy:
-        src: files/cert-manager-namespace.yaml
-        dest: /etc/cert-manager-namespace.yml
-    - command: "{{ item }}"
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      with_items:
-          - helm repo add jetstack https://charts.jetstack.io
-          - helm repo update
-          - kubectl apply -f /etc/cert-manager-namespace.yml
-          - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-                      cert-manager jetstack/cert-manager \
-                      --namespace cert-manager \
-                      --version {{ cert_manager_helm_version }} \
-                      --set installCRDs=true"
+  command: "{{ item }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  with_items:
+    - helm repo add jetstack https://charts.jetstack.io
+    - helm repo update
+    - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s cert-manager jetstack/cert-manager \
+      -n cert-manager --create-namespace --version {{ cert_manager_helm_version }} --set installCRDs=true"
   when: nginx_ingress.enabled
 
 - name: wait Cert-Manager to start
-  wait_for:
-    #host: "cert-manager-webhook.cert-manager.svc"
-    #port: 443
-    sleep: 30
+  command: kubectl get deployment -n cert-manager -l 'app=webhook' -o 'jsonpath={.items[0].status.readyReplicas}'
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: cert_manager_webhook_deployment_status
+  until: (cert_manager_webhook_deployment_status.stdout | default(0) | int) >= 1
+  retries: 30
+  delay: 15
   when: nginx_ingress.enabled
 
 - name: define cluster issuer
   block:
-    - copy:
-        src: files/cluster-certs.yaml
-        dest: /etc/cluster-certs.yml 
-    - command: "kubectl apply -f /etc/cluster-certs.yml "
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
+  - template:
+      src: templates/cluster-certs.yaml
+      dest: /etc/cluster-certs.yml 
+  - command: kubectl apply -f /etc/cluster-certs.yml
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
 
 - name: install dashboard
   block:
-    - copy:
-        src: files/metric-server.yaml
-        dest: /etc/metric-server.yml
-    - template:
-        src: templates/dashboard-values.yaml
-        dest: /etc/dashboard-values.yml
-    - command: "{{ item }}"
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      with_items:
+  - copy:
+      src: files/metric-server.yaml
+      dest: /etc/metric-server.yml
+  - template:
+      src: templates/dashboard-values.yaml
+      dest: /etc/dashboard-values.yml
+  - command: "{{ item }}"
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+    with_items:
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
       - kubectl apply -f /etc/metric-server.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-                             dashboard kubernetes-dashboard/kubernetes-dashboard \
-                             --namespace=kube-system \
-                             --version {{ dashboard_helm_version }} \
-                             --values /etc/dashboard-values.yml"
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s dashboard kubernetes-dashboard/kubernetes-dashboard \
+        -n kube-system --version {{ dashboard_helm_version }} --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
 
 - name: install prometheus
   block:
-    - copy:
-        src: files/prometheus-namespace.yaml
-        dest: /etc/prometheus-namespace.yml
-    - template:
-        src: templates/prometheus-values.yaml
-        dest: /etc/prometheus-values.yml
-    - command: "{{ item }}"
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      with_items:
+  - template:
+      src: templates/prometheus-values.yaml
+      dest: /etc/prometheus-values.yml
+  - command: "{{ item }}"
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+    with_items:
       - helm repo add prometheus https://prometheus-community.github.io/helm-charts
       - helm repo update
-      - kubectl apply -f /etc/prometheus-namespace.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-                             prometheus prometheus/prometheus \
-                             --namespace=prometheus \
-                             --version {{ prometheus_helm_version }} \
-                             --values /etc/prometheus-values.yml"
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s prometheus prometheus/prometheus -n prometheus \
+        --create-namespace --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
   when: nginx_ingress.enabled
 
 - name: install kube-eagle 
-  block:
-    - copy:
-        src: files/eagle-namespace.yaml
-        dest: /etc/eagle-namespace.yml
-    - command: "{{ item }}"
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      with_items:
-      - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
-      - helm repo update
-      - kubectl apply -f /etc/eagle-namespace.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-                             kube-eagle kube-eagle/kube-eagle \
-                             --version {{ kube_eagle_helm_version }} \
-                             --namespace=kube-eagle"
+  command: "{{ item }}"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  with_items:
+    - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
+    - helm repo update
+    - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s kube-eagle kube-eagle/kube-eagle \
+      --version {{ kube_eagle_helm_version }} -n kube-eagle --create-namespace"
   when: nginx_ingress.enabled
 
 - name: install grafana 
   block:
-    - template:
-        src: templates/grafana-secret.yaml
-        dest: /etc/grafana-secret.yml
-    - copy:
-        src: files/grafana-namespace.yaml
-        dest: /etc/grafana-namespace.yml
-    - template:
-        src: templates/grafana-values.yaml
-        dest: /etc/grafana-values.yml
-    - command: "{{ item }}"
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      with_items:
+  - template:
+      src: templates/grafana-secret.yaml
+      dest: /etc/grafana-secret.yml
+  - template:
+      src: templates/grafana-values.yaml
+      dest: /etc/grafana-values.yml
+  - command: "{{ item }}"
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
+    with_items:
       - helm repo add grafana https://grafana.github.io/helm-charts
       - helm repo update
-      - kubectl apply -f /etc/grafana-namespace.yml
+      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s grafana grafana/grafana \
+        -n grafana --create-namespace --version {{ grafana_helm_version }} --values /etc/grafana-values.yml"
       - kubectl apply -n grafana -f /etc/grafana-secret.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
-                             grafana grafana/grafana \
-                             --namespace=grafana \
-                             --version {{ grafana_helm_version }}
-                             --values /etc/grafana-values.yml"
   when: nginx_ingress.enabled
-
-- name: copy empty kubeconfig
-  copy:
-    src: files/kubeconfig
-    dest: /etc/kubeconfig
   
-- name: expose apiserver trhough ingress
-  block:
-    - template:
-        src: templates/api-server-ingress.yaml
-        dest: /etc/api-server-ingress.yaml
-    - command: "{{ item }}"
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      with_items:
-      - kubectl apply -f /etc/api-server-ingress.yaml
+# - name: expose apiserver through ingress
+#   block:
+#   - template:
+#       src: templates/api-server-ingress.yaml
+#       dest: /etc/api-server-ingress.yaml
+#   - command: "{{ item }}"
+#     environment:
+#       KUBECONFIG: /etc/kubernetes/admin.conf
+#   with_items:
+#     - kubectl apply -f /etc/api-server-ingress.yaml
 
 - name: create service account for remote access
-  shell: |
-    kubectl -n kube-system create serviceaccount admin \
-    && kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin \
-    && sleep 30 \
-    && export TOKENNAME=`kubectl -n kube-system get serviceaccount/admin -o jsonpath='{.secrets[0].name}'` \
-    && export TOKEN=`kubectl -n kube-system get secret $TOKENNAME -o jsonpath='{.data.token}' | base64 -d` \
-    &&  kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN \
-    && kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://api-kubernetes.{{nginx_ingress.master_public_ip }}.myip.cloud.infn.it --insecure-skip-tls-verify \
-    && kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin \
-    && kubectl config --kubeconfig=/etc/kubeconfig use-context public
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+  block:
+  - copy:
+      src: files/kubeconfig
+      dest: /etc/kubeconfig
+  - copy:
+      src: files/admin-cred.yaml
+      dest: /etc/admin-cred.yml
+  - shell: |
+      kubectl apply -f /etc/admin-cred.yml
+      kubectl create --dry-run=client clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin -o yaml | kubectl apply -f -
+      export TOKEN=$(kubectl -n kube-system get secret admin-token -o jsonpath='{.data.token}' | base64 -d)
+      kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN
+      kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://api-kubernetes.{{ dns_name }}:6443 --insecure-skip-tls-verify
+      kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin
+      kubectl config --kubeconfig=/etc/kubeconfig use-context public
+    environment:
+      KUBECONFIG: /etc/kubernetes/admin.conf
 
 - name: register kubeconfig
-  shell: kubectl config  --kubeconfig=/etc/kubeconfig view --raw
+  shell: kubectl config --kubeconfig=/etc/kubeconfig view --raw
   register: kubeconfig
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
