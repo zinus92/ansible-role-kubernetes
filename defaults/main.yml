@@ -47,9 +47,10 @@ dashboard_helm_version: 6.0.0
 prometheus_helm_version: 19.6.1
 kube_eagle_helm_version: 2.0.0
 
-grafana_helm_version:  6.52.3
+grafana_helm_version: 6.52.3
 calico_version: v3.24
 
 # Properties related to GPU support
 enable_gpu: false
-gpu_support_role: git+https://baltig.infn.it/infn-cloud/ansible-role-gpu-support,v1.0.0
+# gpu_support_role: git+https://baltig.infn.it/infn-cloud/ansible-role-gpu-support,v1.0.0
+gpu_support_role: git+https://baltig.infn.it/mgattari/ansible-role-gpu-support,feature/k8s-1-24-with-gpu-support

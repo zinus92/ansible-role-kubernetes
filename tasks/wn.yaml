@@ -53,13 +53,24 @@
     - restart kubelet
   when: kubelet_extra_args != ''
 
-- name: wait 5min for flannel and restart kubelet
-  block:
-    - name: wait for flannel and restart kubelet
-      shell: systemctl daemon-reload; service kubelet restart; sleep 60; service kubelet status > /tmp/kubelet_check.log ; grep "start to sync state" /tmp/kubelet_check.log
-      register: cmd_result
-      retries: 20
-      until: cmd_result.rc == 0
+# - name: wait 5min for flannel and restart kubelet
+#   block:
+#     - name: wait for flannel and restart kubelet
+#       shell: systemctl daemon-reload; service kubelet restart; sleep 60; service kubelet status > /tmp/kubelet_check.log ; grep "start to sync state" /tmp/kubelet_check.log
+#       register: cmd_result
+#       retries: 20
+#       until: cmd_result.rc == 0
+#   when: network_manager == "flannel"
+
+- name: Wait for flannel and restart kubelet
+  ansible.builtin.shell: systemctl daemon-reload; service kubelet restart
+  register: kubelet_restart_output
+  changed_when: false
+  when: network_manager == "flannel"
+
+- name: Pause for 1 minute
+  ansible.builtin.pause:
+    minutes: 1
   when: network_manager == "flannel"
 
 - name: get hostname
