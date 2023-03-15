@@ -181,8 +181,8 @@
         --create-namespace --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
   when: nginx_ingress.enabled
 
-- name: install kube-eagle 
-  command: "{{ item }}"
+- name: Install kube-eagle
+  ansible.builtin.command: "{{ item }}"
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   with_items:
@@ -192,25 +192,61 @@
       --version {{ kube_eagle_helm_version }} -n kube-eagle --create-namespace"
   when: nginx_ingress.enabled
 
-- name: install grafana 
-  block:
-  - template:
-      src: templates/grafana-secret.yaml
-      dest: /etc/grafana-secret.yml
-  - template:
-      src: templates/grafana-values.yaml
-      dest: /etc/grafana-values.yml
-  - command: "{{ item }}"
-    environment:
-      KUBECONFIG: /etc/kubernetes/admin.conf
-    with_items:
-      - helm repo add grafana https://grafana.github.io/helm-charts
-      - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s grafana grafana/grafana \
-        -n grafana --create-namespace --version {{ grafana_helm_version }} --values /etc/grafana-values.yml"
-      - kubectl apply -n grafana -f /etc/grafana-secret.yml
+- name: Install grafana
   when: nginx_ingress.enabled
-  
+  block:
+    - name: Copy templates/grafana-secret.yaml
+      ansible.builtin.template:
+        src: templates/grafana-secret.yaml
+        dest: /etc/grafana-secret.yml
+        mode: 0644
+    - name: Copy templates/grafana-values.yaml
+      ansible.builtin.template:
+        src: templates/grafana-values.yaml
+        dest: /etc/grafana-values.yml
+        mode: 0644
+    - name: Helm add grafana repo
+      ansible.builtin.command: "{{ item }}"
+      with_items:
+        - helm repo add grafana https://grafana.github.io/helm-charts
+        - helm repo update
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      changed_when: false
+    - name: Helm install grafana
+      ansible.builtin.shell:
+        cmd: |
+          helm upgrade --install --cleanup-on-fail --wait --timeout 10m0s grafana grafana/grafana \
+          -n grafana --create-namespace --version {{ grafana_helm_version }} --values /etc/grafana-values.yml
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      register: helm_grafana_install
+      changed_when: >
+        helm_grafana_install.rc == 0 or
+        (
+          ('Release "grafana" does not exist. Installing it now.' in helm_grafana_install.stdout) or
+          ('Release "grafana" has been upgraded.' in helm_grafana_install.stdout)
+        )
+      failed_when: >
+        helm_grafana_install.rc != 0 and
+        (
+          ('Release "grafana" does not exist. Installing it now.' not in helm_grafana_install.stdout) and
+          ('Release "grafana" has been upgraded.' not in helm_grafana_install.stdout)
+        )
+    - name: Show result of Helm install grafana
+      ansible.builtin.debug:
+        var: helm_grafana_install
+    - name: Kubectl apply -f /etc/grafana-secret.yml
+      ansible.builtin.command: kubectl apply -n grafana -f /etc/grafana-secret.yml
+      register: kubectl_grafana_secret_apply
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      changed_when:
+        - kubectl_grafana_secret_apply.rc == 0
+    - name: Show result of Kubectl apply -f /etc/grafana-secret.yml
+      ansible.builtin.debug:
+        var: kubectl_grafana_secret_apply
+
 # - name: expose apiserver through ingress
 #   block:
 #   - template:
