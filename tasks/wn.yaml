@@ -53,7 +53,7 @@
     - restart kubelet
   when: kubelet_extra_args != ''
 
-- name: Wait for flannel and restart kubelet
+- name: Restart kubelet and wait for flannel
   when: network_manager == "flannel"
   block:
     # - name: wait 5min for flannel and restart kubelet
@@ -65,22 +65,29 @@
     #       until: cmd_result.rc == 0
     #   when: network_manager == "flannel"
     - name: Restart kubelet
-      ansible.builtin.shell: systemctl daemon-reload; service kubelet restart
+      ansible.builtin.shell: systemctl daemon-reload; systemctl restart kubelet
       changed_when: false
     - name: Pause for 1 minute
       ansible.builtin.pause:
         minutes: 1
-    - name: Get status of kubelet service
-      ansible.builtin.command: service kubelet status
+    - name: Check status of kubelet service
+      ansible.builtin.command: systemctl status kubelet
       register: kubelet_status
       changed_when: false
+      failed_when: (kubelet_status.rc != 0) or ('active (running)' not in kubelet_status.stdout)
+      ignore_errors: true
     - name: Show status of kubelet service
       ansible.builtin.debug:
         var: kubelet_status
+    - name: Fail if kublet service is not running
+      ansible.builtin.fail:
+        msg: kublet is not running!
+      when: kubelet_status is failed
 
-- name: get hostname
-  shell: hostname
+- name: Get hostname
+  ansible.builtin.command: hostname
   register: hostname
+  changed_when: false
 
 - name: set node Label (for k8s bug at kubelet restart)
   command: kubectl label --overwrite node {{ hostname.stdout }} {{ nodelabel }}

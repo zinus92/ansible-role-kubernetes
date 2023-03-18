@@ -52,5 +52,4 @@ calico_version: v3.24
 
 # Properties related to GPU support
 enable_gpu: false
-# gpu_support_role: git+https://baltig.infn.it/infn-cloud/ansible-role-gpu-support,v1.0.0
-gpu_support_role: git+https://baltig.infn.it/mgattari/ansible-role-gpu-support,feature/k8s-1-24-with-gpu-support
+gpu_support_role: git+https://baltig.infn.it/infn-cloud/ansible-role-gpu-support,v1.2.0
