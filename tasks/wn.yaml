@@ -67,7 +67,9 @@
   register: hostname
 
 - name: set node Label (for k8s bug at kubelet restart)
-  shell: kubectl label --overwrite node {{ hostname.stdout }} {{ nodelabel }}
+  command: kubectl label --overwrite node {{ hostname.stdout }} {{ nodelabel }}
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
   delegate_to: "{{ kube_front_end_ip }}"
   when: nodelabel != ""
 

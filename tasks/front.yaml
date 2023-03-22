@@ -38,11 +38,11 @@
 - name: install calico
   block:
   - get_url:
-    url: https://docs.projectcalico.org/manifests/custom-resources.yaml
-    dest: /etc/kube-calico-crds.yml
+      url: https://docs.projectcalico.org/manifests/custom-resources.yaml
+      dest: /etc/kube-calico-crds.yml
   - get_url:
-    url: https://docs.projectcalico.org/manifests/tigera-operator.yaml 
-    dest: /etc/kube-calico-operator.yml
+      url: https://docs.projectcalico.org/manifests/tigera-operator.yaml 
+      dest: /etc/kube-calico-operator.yml
   - command: "{{item}}"
     with_items:
       - 'kubectl apply -f /etc/kube-calico-operator.yml'
@@ -104,7 +104,9 @@
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                               ingress-nginx \
                               ingress-nginx/ingress-nginx \
+                              --set controller.allowSnippetAnnotations=false \
                               --namespace=ingress-nginx \
+                              --version {{ nginx_ingress_helm_version }} \
                               --values /etc/nginx-ingress-values.yml"
   when: nginx_ingress.enabled
 
@@ -123,7 +125,7 @@
           - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                       cert-manager jetstack/cert-manager \
                       --namespace cert-manager \
-                      --version v1.1.0 \
+                      --version {{ cert_manager_helm_version }} \
                       --set installCRDs=true"
   when: nginx_ingress.enabled
 
@@ -161,6 +163,7 @@
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              dashboard kubernetes-dashboard/kubernetes-dashboard \
                              --namespace=kube-system \
+                             --version {{ dashboard_helm_version }} \
                              --values /etc/dashboard-values.yml"
   when: nginx_ingress.enabled
 
@@ -182,6 +185,7 @@
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              prometheus prometheus/prometheus \
                              --namespace=prometheus \
+                             --version {{ prometheus_helm_version }} \
                              --values /etc/prometheus-values.yml"
   when: nginx_ingress.enabled
 
@@ -199,6 +203,7 @@
       - kubectl apply -f /etc/eagle-namespace.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              kube-eagle kube-eagle/kube-eagle \
+                             --version {{ kube_eagle_helm_version }} \
                              --namespace=kube-eagle"
   when: nginx_ingress.enabled
 
@@ -224,6 +229,7 @@
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 30m0s \
                              grafana grafana/grafana \
                              --namespace=grafana \
+                             --version {{ grafana_helm_version }}
                              --values /etc/grafana-values.yml"
   when: nginx_ingress.enabled
 

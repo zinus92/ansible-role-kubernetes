@@ -55,4 +55,4 @@ ingress:
       secretName: grafana-selfsigned
 grafana.ini:
   security:
-    cookie_secure: true
+    cookie_secure: true 

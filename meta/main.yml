@@ -15,4 +15,8 @@ galaxy_info:
   galaxy_tags:
     - kubernetes
 
-dependencies: ["indigo-dc.docker"]
+dependencies:
+  - role: indigo-dc.docker
+    vars:
+      docker_config:
+        exec-opts: ["native.cgroupdriver=systemd"]

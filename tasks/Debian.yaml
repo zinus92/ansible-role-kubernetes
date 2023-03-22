@@ -14,6 +14,7 @@
 
 - name: Add kubernetes repo
   apt_repository:
+    # TODO Xenial is Ubuntu 16
     repo:  'deb http://apt.kubernetes.io/ kubernetes-xenial main'
     state: present
     update_cache: yes
