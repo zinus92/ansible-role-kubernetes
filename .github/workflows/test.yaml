@@ -1,7 +1,12 @@
 name: tester
 
 # Run this workflow every time a new commit pushed to your repository
-on: push
+on: 
+  push:
+    branches:
+      - k8s_1_24
+  
+  workflow_dispatch:
 
 jobs:
   # Set the job key. The key is displayed as the job name
@@ -14,7 +19,7 @@ jobs:
       matrix:
         #python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
         python-version: [3.8]
-        os: [ubuntu-16.04]
+        os: [ubuntu-20.04]
     runs-on: ${{ matrix.os }}
 
     steps:

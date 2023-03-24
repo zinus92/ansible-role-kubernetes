@@ -1,7 +1,7 @@
 ---
 - name: Set ansible-role-gpu-support role name fact
   ansible.builtin.set_fact:
-    gpu_support_role_name: "{{ (gpu_support_role.split('/') | last).split(',') | first }}"
+    gpu_support_role_name: "{{ (gpu_support_role.split(',') | first).split('/') | last }}"
 
 - name: Print ansible-role-gpu-support role facts
   ansible.builtin.debug:
