@@ -1,5 +1,5 @@
 # Version to install or latest
-kube_version: 1.24.9
+kube_version: 1.24.12
 # Type of node front or wn
 kube_type_of_node: front
 # IP address or name of the Kube front node
@@ -44,10 +44,10 @@ cert_manager_helm_version: v1.10.0
 cert_manager_type: letsencrypt-prod # [self-signed, letsencrypt-staging, letsencrypt-prod]
 cert_manager_email: '' # used only for letsencrypt 
 dashboard_helm_version: 6.0.0
-prometheus_helm_version: 19.6.1
+prometheus_helm_version: 19.7.2
 kube_eagle_helm_version: 2.0.0
 
-grafana_helm_version: 6.52.3
+grafana_helm_version: 6.52.9
 calico_version: v3.24
 
 # Properties related to GPU support
