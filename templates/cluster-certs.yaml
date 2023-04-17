@@ -1,21 +1,19 @@
-{% if cert_manager_type == 'self-signed' %}
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
+{% if cert_manager_type == 'self-signed' %}
 metadata:
   name: selfsigned-issuer
 spec:
   selfSigned: {}
 {% else %}
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
 metadata:
-  name: "{{ cert_manager_type }}-issuer"
+  name: {{ cluster_issuer_name }}
 spec:
   acme:
     # The ACME server URL
-    server: "{{ acme_server_url }}"
+    server: {{ acme_server_url }}
     # Email address used for ACME registration
-    email: "{{ acme_email }}"
+    email: {{ acme_email }}
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt
