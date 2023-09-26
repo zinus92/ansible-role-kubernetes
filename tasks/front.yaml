@@ -102,8 +102,69 @@
     host: "{{ kube_api_server }}"
     port: 6443
 
+- name: Collect NotReady nodes
+  ansible.builtin.shell: "kubectl get nodes | grep NotReady | grep -v vnode-0 | awk '{print $1}'"
+  register: notready_nodes
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  failed_when: false
+  changed_when: false
+
+- name: NotReady nodes
+  ansible.builtin.debug:
+    msg: "NotReady nodes: {{ notready_nodes.stdout }}"
+
+- name: Cordon nodes
+  ansible.builtin.shell: "kubectl cordon {{ item }} "
+  loop:
+    "{{ notready_nodes.stdout.split('\n') }}"
+  register: output_cordon
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  when: notready_nodes.stdout | length > 0
+
+- name: Output cordon nodes
+  ansible.builtin.debug:
+    msg: "Cordoned nodes: {{ output_cordon }}"
+  when: notready_nodes.stdout | length > 0
+
+#- name: Drain nodes
+#  ansible.builtin.shell: "kubectl drain {{ item }} --delete-emptydir-data --ignore-daemonsets --force"
+#  loop:
+#    "{{ notready_nodes.stdout.split('\n') }}"
+#  environment:
+#    KUBECONFIG: /etc/kubernetes/admin.conf
+#  register: output_drain
+#  when: notready_nodes.stdout | length > 0
+
+#- name: Output drain nodes
+#  ansible.builtin.debug:
+#    msg: "Drain nodes: {{ output_drain }}"
+#  when: notready_nodes.stdout | length > 0
+
+- name: Delete NotReady nodes
+  ansible.builtin.shell: "kubectl delete node {{ item }} "
+  loop:
+    "{{ notready_nodes.stdout.split('\n') }}"
+  register: output_delete
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  when: notready_nodes.stdout | length > 0
+
+- name: Output node deletion
+  ansible.builtin.debug:
+    msg: "Deleted nodes: {{ output_delete }}"
+  when: notready_nodes.stdout | length > 0
+
+- name: Check if ingress-nginx is already installed
+  ansible.builtin.shell: "helm list -a -n ingress-nginx"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: ingress_nginx_present
+
 - name: install nginx ingress
-  block:
+  when: nginx_ingress.enabled and ('ingress-nginx' not in ingress_nginx_present.stdout)
+  block:  
   - template:
       src: templates/nginx-values.yaml
       dest: /etc/nginx-ingress-values.yml
@@ -115,9 +176,15 @@
       - helm repo update
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s ingress-nginx ingress-nginx/ingress-nginx --set controller.allowSnippetAnnotations=false \
         -n ingress-nginx --create-namespace --version {{ nginx_ingress_helm_version }} --values /etc/nginx-ingress-values.yml"
-  when: nginx_ingress.enabled
+  
+- name: Check if cert-manager is already installed
+  ansible.builtin.shell: "helm list -a -n cert-manager"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: cert_manager_present
 
 - name: install cert manager
+  when: nginx_ingress.enabled and ('cert-manager' not in cert_manager_present.stdout)
   command: "{{ item }}"
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
@@ -126,8 +193,7 @@
     - helm repo update
     - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s cert-manager jetstack/cert-manager \
       -n cert-manager --create-namespace --version {{ cert_manager_helm_version }} --set installCRDs=true"
-  when: nginx_ingress.enabled
-
+ 
 - name: wait Cert-Manager to start
   command: kubectl get deployment -n cert-manager -l 'app=webhook' -o 'jsonpath={.items[0].status.readyReplicas}'
   environment:
@@ -147,7 +213,14 @@
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
 
+- name: Check if dashboard is already installed
+  ansible.builtin.shell: "helm list -a -n kube-system"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: dashboard_present
+
 - name: install dashboard
+  when: nginx_ingress.enabled and ('dashboard' not in dashboard_present.stdout)
   block:
   - copy:
       src: files/metric-server.yaml
@@ -164,9 +237,15 @@
       - kubectl apply -f /etc/metric-server.yml
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s dashboard kubernetes-dashboard/kubernetes-dashboard \
         -n kube-system --version {{ dashboard_helm_version }} --values /etc/dashboard-values.yml"
-  when: nginx_ingress.enabled
+  
+- name: Check if prometheus is already installed
+  ansible.builtin.shell: "helm list -a -n prometheus"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: prometheus_present
 
-- name: install prometheus
+- name: Install prometheus
+  when: (nginx_ingress.enabled) and ('prometheus' not in prometheus_present.stdout)
   block:
   - template:
       src: templates/prometheus-values.yaml
@@ -179,9 +258,15 @@
       - helm repo update
       - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s prometheus prometheus/prometheus -n prometheus \
         --create-namespace --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
-  when: nginx_ingress.enabled
+
+- name: Check if kube-eagle is already installed
+  ansible.builtin.shell: "helm list -a -n kube-eagle"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: kube_eagle_present
 
 - name: Install kube-eagle
+  when: nginx_ingress.enabled and ('kube-eagle' not in kube_eagle_present.stdout)
   ansible.builtin.command: "{{ item }}"
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
@@ -190,10 +275,16 @@
     - helm repo update
     - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s kube-eagle kube-eagle/kube-eagle \
       --version {{ kube_eagle_helm_version }} -n kube-eagle --create-namespace"
-  when: nginx_ingress.enabled
+
+
+- name: Check if grafana is already installed
+  ansible.builtin.shell: "helm list -a -n grafana"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf
+  register: grafana_present
 
 - name: Install grafana
-  when: nginx_ingress.enabled
+  when: nginx_ingress.enabled and ('grafana' not in grafana_present.stdout)
   block:
     - name: Copy templates/grafana-secret.yaml
       ansible.builtin.template:
@@ -250,6 +341,7 @@
     - name: Show result of Helm install grafana
       ansible.builtin.debug:
         var: helm_grafana_install
+    
 
 - name: expose apiserver through ingress
   block:
