@@ -14,12 +14,12 @@
 - name: Kubeadm init
   command: kubeadm init --pod-network-cidr={{ kube_pod_network_cidr }} --token={{ kube_token }} --token-ttl {{ kube_token_ttl }} --apiserver-advertise-address={{ kube_api_server }} creates=/etc/kubernetes/admin.conf
 
-- name: wait Kube to start
+- name: Wait Kube to start
   wait_for:
     host: "{{ kube_api_server }}"
     port: 6443
 
-- name: install flannel
+- name: Install flannel
   block:
   - template:
       src: templates/flannel.yaml
@@ -29,7 +29,7 @@
       KUBECONFIG: /etc/kubernetes/admin.conf
   when: network_manager == "flannel"
 
-- name: install calico
+- name: Install calico
   block:
   - get_url:
       url: https://projectcalico.docs.tigera.io/archive/{{ calico_version }}/manifests/calico.yaml
@@ -44,16 +44,16 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   when: kube_install_helm
 
-- name: Add Kube API server options
-  lineinfile:
-    path: /etc/kubernetes/manifests/kube-apiserver.yaml
-    line: '    - {{ item.option }}={{ item.value }}'
-    regexp: '^    - {{ item.option }}='
-    insertafter: '    - kube-apiserver'
-  notify: restart kubeapi
-  with_items: "{{ kube_apiserver_options }}"
+#- name: Add Kube API server options
+#  lineinfile:
+#    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+#    line: '    - {{ item.option }}={{ item.value }}'
+#    regexp: '^    - {{ item.option }}='
+#    insertafter: '    - kube-apiserver'
+#  notify: restart kubeapi
+#  with_items: "{{ kube_apiserver_options }}"
 
-- name: wait Kube to start
+- name: Wait Kube to start
   wait_for:
     host: "{{ kube_api_server }}"
     port: 6443
@@ -97,7 +97,7 @@
   - name: save iptable configuration
     command: iptables-save
 
-- name: wait Kube to start
+- name: Wait Kube to start
   wait_for:
     host: "{{ kube_api_server }}"
     port: 6443
@@ -162,7 +162,7 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   register: ingress_nginx_present
 
-- name: install nginx ingress
+- name: Install nginx ingress
   when: nginx_ingress.enabled and ('ingress-nginx' not in ingress_nginx_present.stdout)
   block:  
   - template:
@@ -174,7 +174,7 @@
     with_items:
       - helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s ingress-nginx ingress-nginx/ingress-nginx --set controller.allowSnippetAnnotations=false \
+      - "helm install ingress-nginx ingress-nginx/ingress-nginx  --atomic --set controller.allowSnippetAnnotations=false \
         -n ingress-nginx --create-namespace --version {{ nginx_ingress_helm_version }} --values /etc/nginx-ingress-values.yml"
   
 - name: Check if cert-manager is already installed
@@ -183,7 +183,7 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   register: cert_manager_present
 
-- name: install cert manager
+- name: Install cert manager
   when: nginx_ingress.enabled and ('cert-manager' not in cert_manager_present.stdout)
   command: "{{ item }}"
   environment:
@@ -191,8 +191,7 @@
   with_items:
     - helm repo add jetstack https://charts.jetstack.io
     - helm repo update
-    - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s cert-manager jetstack/cert-manager \
-      -n cert-manager --create-namespace --version {{ cert_manager_helm_version }} --set installCRDs=true"
+    - "helm install cert-manager jetstack/cert-manager --atomic -n cert-manager --create-namespace --version {{ cert_manager_helm_version }} --set installCRDs=true"
  
 - name: wait Cert-Manager to start
   command: kubectl get deployment -n cert-manager -l 'app=webhook' -o 'jsonpath={.items[0].status.readyReplicas}'
@@ -235,8 +234,7 @@
       - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
       - helm repo update
       - kubectl apply -f /etc/metric-server.yml
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s dashboard kubernetes-dashboard/kubernetes-dashboard \
-        -n kube-system --version {{ dashboard_helm_version }} --values /etc/dashboard-values.yml"
+      - "helm install dashboard kubernetes-dashboard/kubernetes-dashboard --atomic -n kube-system --version {{ dashboard_helm_version }} --values /etc/dashboard-values.yml"
   
 - name: Check if prometheus is already installed
   ansible.builtin.shell: "helm list -a -n prometheus"
@@ -256,8 +254,7 @@
     with_items:
       - helm repo add prometheus https://prometheus-community.github.io/helm-charts
       - helm repo update
-      - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s prometheus prometheus/prometheus -n prometheus \
-        --create-namespace --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
+      - "helm install prometheus prometheus/prometheus --atomic -n prometheus --create-namespace --version {{ prometheus_helm_version }} --values /etc/prometheus-values.yml"
 
 - name: Check if kube-eagle is already installed
   ansible.builtin.shell: "helm list -a -n kube-eagle"
@@ -273,8 +270,7 @@
   with_items:
     - helm repo add kube-eagle https://raw.githubusercontent.com/cloudworkz/kube-eagle-helm-chart/master
     - helm repo update
-    - "helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s kube-eagle kube-eagle/kube-eagle \
-      --version {{ kube_eagle_helm_version }} -n kube-eagle --create-namespace"
+    - "helm install kube-eagle kube-eagle/kube-eagle --atomic -n kube-eagle --create-namespace --version {{ kube_eagle_helm_version }}"
 
 
 - name: Check if grafana is already installed
@@ -300,50 +296,24 @@
       ansible.builtin.command: kubectl create ns grafana
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
-    - name: Kubectl apply -f /etc/grafana-secret.yml
+    - name: Create grafana secret
       ansible.builtin.command: kubectl apply -n grafana -f /etc/grafana-secret.yml
       register: kubectl_grafana_secret_apply
       environment:
         KUBECONFIG: /etc/kubernetes/admin.conf
       changed_when:
         - kubectl_grafana_secret_apply.rc == 0
-    - name: Show result of Kubectl apply -f /etc/grafana-secret.yml
-      ansible.builtin.debug:
-        var: kubectl_grafana_secret_apply
-    - name: Helm add grafana repo
+    - name: Install grafana
       ansible.builtin.command: "{{ item }}"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
       with_items:
         - helm repo add grafana https://grafana.github.io/helm-charts
         - helm repo update
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      changed_when: false
-    - name: Helm install grafana
-      ansible.builtin.shell:
-        cmd: |
-          helm upgrade --install --cleanup-on-fail --wait --timeout 5m0s grafana grafana/grafana \
-          -n grafana --create-namespace --version {{ grafana_helm_version }} --values /etc/grafana-values.yml
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
-      register: helm_grafana_install
-      changed_when: >
-        helm_grafana_install.rc == 0 or
-        (
-          ('Release "grafana" does not exist. Installing it now.' in helm_grafana_install.stdout) or
-          ('Release "grafana" has been upgraded.' in helm_grafana_install.stdout)
-        )
-      failed_when: >
-        helm_grafana_install.rc != 0 and
-        (
-          ('Release "grafana" does not exist. Installing it now.' not in helm_grafana_install.stdout) and
-          ('Release "grafana" has been upgraded.' not in helm_grafana_install.stdout)
-        )
-    - name: Show result of Helm install grafana
-      ansible.builtin.debug:
-        var: helm_grafana_install
-    
+        - "helm install grafana grafana/grafana --atomic -n grafana --version {{ grafana_helm_version }} --values /etc/grafana-values.yml"
 
-- name: expose apiserver through ingress
+
+- name: Expose apiserver through ingress
   block:
   - template:
       src: templates/api-server-ingress.yaml
@@ -352,7 +322,7 @@
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
 
-- name: create service account for remote access
+- name: Create service account for remote access
   block:
   - copy:
       src: files/kubeconfig
@@ -371,7 +341,7 @@
     environment:
       KUBECONFIG: /etc/kubernetes/admin.conf
 
-- name: register kubeconfig
+- name: Register kubeconfig
   shell: kubectl config --kubeconfig=/etc/kubeconfig view --raw
   register: kubeconfig
   environment:
