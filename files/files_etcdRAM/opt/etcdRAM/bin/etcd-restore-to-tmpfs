@@ -1,0 +1,38 @@
+#!/bin/bash 
+
+PATH=/opt/etcdRAM/bin:$PATH
+
+echo "$0: verifying that etcd is not running"
+if nc -z 127.0.0.1  2379
+then
+  echo "$0: etcd port 2379 is already open, skipping restore of data" 1>&2
+  exit 0 
+fi
+
+echo "$0: verifying that containerd is running" 
+if ! systemctl status containerd > /dev/null 2>&1 
+then
+  echo "$0: containerd is not running, cannot perform restore" 1>&2
+  exit 1
+fi
+
+echo "$0: verifying that /var/lib/etcd is empty" 
+size="$( du -s /var/lib/etcd | awk '{ print $1 }' )"
+if [[ "$size" -ne 0 ]]
+then
+  echo "$0: /var/lib/etcd is not empty, assuming data left from previous etcd" 1>&2 
+  exit 0
+fi
+
+backupfile="$( cd /var/lib/etcdRAM/etcd; ls -rt *.db | tail -1 )"
+echo "$0: Using backup file '$backupfile' for restore"
+
+etcd-restore "$backupfile"
+if [[ $? -ne 0 ]]
+then
+  echo "$0: restore of etcd failed" 1>&2
+  exit 1
+fi
+echo "$0: restore of etcd data finished" 
+
+rsync -avz /var/lib/etcd.restored/ /var/lib/etcd/

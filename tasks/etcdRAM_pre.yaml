@@ -1,0 +1,15 @@
+---
+- name: Create directory /var/lib/etcd
+  file:
+    path: /var/lib/etcd
+    state: directory
+    mode: 0755
+
+- name: Move ETCD in RAM
+  block:
+  - name: Edit /etc/fstab
+    lineinfile:
+      path: /etc/fstab
+      line: tmpfs  /var/lib/etcd  tmpfs  defaults,noatime,size=2g  0 0
+  - name: Mount all
+    ansible.builtin.shell: mount -a

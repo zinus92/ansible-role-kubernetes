@@ -36,17 +36,22 @@ kube_flanneld_extra_args: []
 node_name: AUTO
 nodelabel: ''
 
+# Software versions
 kube_install_helm: true
 helm_version: v3.13.2
-nginx_ingress_helm_version: 4.8.3
+nginx_ingress_helm_version: 4.8.4
 cert_manager_helm_version: v1.13.2
 cert_manager_type: letsencrypt-prod # [self-signed, letsencrypt-staging, letsencrypt-prod]
 cert_manager_email: '' # used only for letsencrypt 
 dashboard_helm_version: 6.0.8
-prometheus_helm_version: 25.4.0
+prometheus_helm_version: 25.8.0
 kube_eagle_helm_version: 2.0.0
-grafana_helm_version: 7.0.3
+grafana_helm_version: 7.0.11
 calico_version: v3.26
+nerdctl_version: 1.7.1
+
+# If true, running kubernetes etcd in ramdisk
+etcd_in_RAM: true
 
 # Properties related to GPU support
 enable_gpu: false

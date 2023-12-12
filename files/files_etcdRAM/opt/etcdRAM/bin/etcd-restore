@@ -1,0 +1,41 @@
+#!/bin/bash 
+
+PATH=/opt/etcdRAM/bin:$PATH
+
+if [[ $# -ne 1 ]]
+then
+  (
+  echo "Usage: $0 <backuppname>"
+  echo "  <backupname> must be a relative path to a backup below the /var/lib/etcdRAM/etcd directory"
+  ) 1>&2
+  exit 1
+fi
+
+backup="$1"
+
+. /var/lib/etcdRAM/etcd/etcdimage
+if [[ -z "$IMAGE" ]]
+then
+  IMAGE="registry.k8s.io/etcd:3.5.9-0"
+  echo "ETCD image cannot be determined, using fall back $IMAGE" 1>&2
+fi
+
+echo "ETCD image: $IMAGE"
+
+set -e
+rm -rf /var/lib/etcd.restored
+mkdir -p /var/lib/etcd.restored
+# using --network host to work around incompatibility of CNI versions
+/opt/etcdRAM/bin/crictl run --rm \
+    --network host \
+    -v '/var/lib/etcdRAM/etcd:/var/lib/etcdRAM/etcd' \
+    -v '/var/lib/etcd.restored:/var/lib/etcd.restored' \
+    --env ETCDCTL_API=3 \
+    "$IMAGE" \
+    /bin/sh -c "etcdctl snapshot restore /var/lib/etcdRAM/etcd/$backup --data-dir /var/lib/etcd.restored/data"
+
+mv /var/lib/etcd.restored/data/* /var/lib/etcd.restored
+rmdir /var/lib/etcd.restored/data
+
+echo ""
+echo "Restore is available at /var/lib/etcd.restored"

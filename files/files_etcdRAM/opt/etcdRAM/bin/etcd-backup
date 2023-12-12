@@ -1,0 +1,31 @@
+#!/bin/bash
+
+PATH=/opt/etcdRAM/bin:$PATH
+
+if [[ $# -ne 1 ]]
+then
+  echo "Usage: $0 <backupname>" 1>&2
+  exit 1
+fi
+
+BACKUP="$1"
+
+IMAGE="$( /opt/etcdRAM/bin/crictl ps | awk '/\/etcd$/ { print $2 }' )"
+if [[ -z "$IMAGE" ]]
+then
+  echo "$0: could not create backup" 1>&2
+  exit 1
+fi
+
+/opt/etcdRAM/bin/crictl run --network host \
+  -v /etc/kubernetes/pki/etcd:/etc/kubernetes/pki/etcd \
+  -v /var/lib/etcdRAM/etcd:/var/lib/etcdRAM/etcd \
+  --rm "$IMAGE" sh -c "etcdctl \
+  --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \
+  --key=/etc/kubernetes/pki/etcd/healthcheck-client.key \
+  snapshot save /var/lib/etcdRAM/etcd/$BACKUP"
+
+echo "IMAGE=$IMAGE" > /var/lib/etcdRAM/etcd/etcdimage
+echo "Backup done at /var/lib/etcdRAM/etcd/$BACKUP"

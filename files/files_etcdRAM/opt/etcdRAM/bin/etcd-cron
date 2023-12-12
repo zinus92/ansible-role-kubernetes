@@ -1,0 +1,18 @@
+#!/bin/bash
+
+PATH=/opt/etcdRAM/bin:$PATH
+
+DATE="$( date +%Y-%m-%d_%H:%M:%S )"
+DIR="$( date +%Y-%m-%d )"
+
+etcd-backup etcd-snapshot-latest.db.tmp
+mv /var/lib/etcdRAM/etcd/etcd-snapshot-latest.db.tmp /var/lib/etcdRAM/etcd/etcd-snapshot-latest.db
+
+ln /var/lib/etcdRAM/etcd/etcd-snapshot-latest.db /var/lib/etcdRAM/etcd/etcd-backup-$DATE.db
+mkdir -p /var/lib/etcdRAM/etcd/"$DIR"
+if [[ ! -r /var/lib/etcdRAM/etcd/$DIR/etcd-backup.db ]]
+then
+  ln /var/lib/etcdRAM/etcd/etcd-snapshot-latest.db /var/lib/etcdRAM/etcd/$DIR/etcd-backup.db
+fi 
+ls -t /var/lib/etcdRAM/etcd/etcd-backup* | awk 'NR > 6' | xargs rm -f 
+find /var/lib/etcdRAM/etcd -mtime +10 | xargs rm -rf

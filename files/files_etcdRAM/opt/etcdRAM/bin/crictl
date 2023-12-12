@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec nerdctl -n k8s.io "$@"
