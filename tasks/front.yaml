@@ -1,5 +1,5 @@
 ---
-- include: etcdRAM_pre.yaml
+- ansible.builtin.include_tasks: etcdRAM_pre.yaml
   when: etcd_in_RAM
 
 - name: Create a directory if it does not exist
@@ -48,9 +48,7 @@
     dest: /etc/crictl.yaml
     mode: 0644
 
-- include: helm.yaml
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
+- ansible.builtin.include_tasks: helm.yaml
   when: kube_install_helm
 
 #- name: Add Kube API server options
@@ -165,7 +163,7 @@
     msg: "Deleted nodes: {{ output_delete }}"
   when: notready_nodes.stdout | length > 0
 
-- include: software-installation.yaml
+- ansible.builtin.include_tasks: software-installation.yaml
 
 - name: Expose apiserver through ingress
   block:
@@ -205,5 +203,5 @@
   debug:
     var: kubeconfig.stdout.split('\n')
 
-- include: etcdRAM_backup.yaml
+- ansible.builtin.include_tasks: etcdRAM_backup.yaml
   when: etcd_in_RAM

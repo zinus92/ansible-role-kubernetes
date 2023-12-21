@@ -39,7 +39,7 @@ nodelabel: ''
 # Software versions
 kube_install_helm: true
 helm_version: v3.13.2
-nginx_ingress_helm_version: 4.8.4
+nginx_ingress_helm_version: 4.9.0
 cert_manager_helm_version: v1.13.2
 cert_manager_type: letsencrypt-prod # [self-signed, letsencrypt-staging, letsencrypt-prod]
 cert_manager_email: '' # used only for letsencrypt 
