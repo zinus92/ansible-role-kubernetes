@@ -49,8 +49,6 @@
     mode: 0644
 
 - ansible.builtin.include_tasks: helm.yaml
-  environment:
-    KUBECONFIG: /etc/kubernetes/admin.conf
   when: kube_install_helm
 
 #- name: Add Kube API server options

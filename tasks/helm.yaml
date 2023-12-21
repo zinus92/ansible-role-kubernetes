@@ -14,7 +14,4 @@
         mode: 0755
     - name: Execute helm install script
       command: bash -c "chmod +x /tmp/helm.sh && DESIRED_VERSION={{ helm_version }} /tmp/helm.sh"
- 
-      environment:
-        KUBECONFIG: /etc/kubernetes/admin.conf
   when: not helm.stat.exists
