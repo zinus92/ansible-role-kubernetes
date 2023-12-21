@@ -1,5 +1,5 @@
 ---
-- include: etcdRAM_pre.yaml
+- ansible.builtin.include_tasks: etcdRAM_pre.yaml
   when: etcd_in_RAM
 
 - name: Create a directory if it does not exist
@@ -48,7 +48,7 @@
     dest: /etc/crictl.yaml
     mode: 0644
 
-- include: helm.yaml
+- ansible.builtin.include_tasks: helm.yaml
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
   when: kube_install_helm
@@ -165,7 +165,7 @@
     msg: "Deleted nodes: {{ output_delete }}"
   when: notready_nodes.stdout | length > 0
 
-- include: software-installation.yaml
+- ansible.builtin.include_tasks: software-installation.yaml
 
 - name: Expose apiserver through ingress
   block:
@@ -187,8 +187,7 @@
   - shell: |
       kubectl apply -f /etc/admin-cred.yml
       kubectl create --dry-run=client clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:admin -o yaml | kubectl apply -f -
-      export TOKEN=$(kubectl -n kube-system get secret admin-token -o jsonpath='{.data.token}' | base64 -d)
-      kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token=$TOKEN
+      kubectl config --kubeconfig=/etc/kubeconfig set-credentials admin --token={{ kube_admin_token }}
       kubectl config --kubeconfig=/etc/kubeconfig set-cluster public --server=https://api-kubernetes.{{ dns_name }} --insecure-skip-tls-verify
       kubectl config --kubeconfig=/etc/kubeconfig set-context public --cluster=public --namespace=default --user=admin
       kubectl config --kubeconfig=/etc/kubeconfig use-context public
@@ -205,5 +204,5 @@
   debug:
     var: kubeconfig.stdout.split('\n')
 
-- include: etcdRAM_backup.yaml
+- ansible.builtin.include_tasks: etcdRAM_backup.yaml
   when: etcd_in_RAM

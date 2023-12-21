@@ -36,7 +36,7 @@
     - helm repo update
     - "helm install cert-manager jetstack/cert-manager --atomic -n cert-manager --create-namespace --version {{ cert_manager_helm_version }} --set installCRDs=true"
  
-- name: wait Cert-Manager to start
+- name: Wait Cert-Manager to start
   command: kubectl get deployment -n cert-manager -l 'app=webhook' -o 'jsonpath={.items[0].status.readyReplicas}'
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf
@@ -46,7 +46,7 @@
   delay: 15
   when: nginx_ingress.enabled
 
-- name: define cluster issuer
+- name: Define cluster issuer
   block:
   - template:
       src: templates/cluster-certs.yaml
@@ -61,7 +61,7 @@
     KUBECONFIG: /etc/kubernetes/admin.conf
   register: dashboard_present
 
-- name: install dashboard
+- name: Install dashboard
   when: nginx_ingress.enabled and ('dashboard' not in dashboard_present.stdout)
   block:
   - copy:

@@ -1,5 +1,5 @@
 ---
-- name: update repositories cache and install NFS
+- name: Update repositories cache and install NFS
   apt:
     name: nfs-common
     update_cache: yes
@@ -88,7 +88,7 @@
   register: hostname
   changed_when: false
 
-- name: set node Label (for k8s bug at kubelet restart)
+- name: Set node Label (for k8s bug at kubelet restart)
   command: kubectl label --overwrite node {{ hostname.stdout }} {{ nodelabel }}
   environment:
     KUBECONFIG: /etc/kubernetes/admin.conf

@@ -1,5 +1,5 @@
 ---
-- name: check if HELM already installed
+- name: Check if HELM already installed
   stat:
     path: /usr/local/bin/helm
   register: helm
