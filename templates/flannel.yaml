@@ -170,6 +170,7 @@ spec:
         args:
         - --ip-masq
         - --kube-subnet-mgr
+        - --iface-regex={{ nginx_ingress.master_private_ip | regex_replace('^([0-9]+).([0-9]+).([0-9]+).*$', "\\1\\\.\\2\\\.\\3\\\.*") }}
         resources:
           requests:
             cpu: "100m"
