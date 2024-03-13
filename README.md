@@ -7,7 +7,7 @@ This ansible role installs a [Kubernetes](https://kubernetes.io/) cluster.
 The variables that can be passed to this role and a brief description about them are as follows:
 
     # Version to install or latest
-    kube_version: 1.28.3
+    kube_version: 1.28.7
     # Type of node front or wn
     kube_type_of_node: front
     # IP address or name of the Kube front node
