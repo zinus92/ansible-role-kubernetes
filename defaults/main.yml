@@ -43,7 +43,7 @@ nginx_ingress_helm_version: 4.9.1
 cert_manager_helm_version: v1.13.5
 cert_manager_type: letsencrypt-prod # [self-signed, letsencrypt-staging, letsencrypt-prod]
 cert_manager_email: '' # used only for letsencrypt 
-dashboard_helm_version: 7.1.2
+dashboard_helm_version: 6.0.8
 prometheus_helm_version: 25.17.0
 kube_eagle_helm_version: 2.0.0
 grafana_helm_version: 7.3.6
